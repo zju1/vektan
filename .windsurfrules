@@ -1,0 +1,14 @@
+# THIS IS FUCKING FRONTEND PROJECT
+
+# Cascade
+ - DTO filename: camelCase.dto.ts
+ - Form file name: PascalCaseForm.tsx
+ - Page file name: PascalCasePage.tsx
+
+# USE CURRENT PROJECT STRUCTURE
+- Use current project structure for new files and their contents.
+- If you have to create CRUD, use client.dto.ts, ClientForm.tsx, ClientsPage.tsx, clients.api.ts as templates.
+
+# JUST CREATE NEW FILES BASED ON EXISTING FILES. DO NOT CREATE A NEW FILE IF NO TEMPLATE IS PROVIDED
+
+# ANALYZE navigation-links.ts TO DETERMINE WHERE TO ADD NEW FILES (Grouping or not)

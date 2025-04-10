@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+.ant-form-item {
+  margin-bottom: 0;
+}
+
+.ant-table-wrapper,
+.ant-spin-nested-loading,
+.ant-spin-container,
+.ant-table,
+.ant-table-container {
+  max-width: 100%;
+  display: grid;
+}
+
+.ant-modal-content:has(.ant-modal-confirm-body-wrapper) {
+  padding: 0;
+  overflow: hidden;
+
+  .ant-modal-confirm-body-has-title {
+    padding: 16px;
+    gap: 0 !important;
+    margin: 0 !important;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .anticon {
+    display: none;
+  }
+
+  .ant-modal-confirm-paragraph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    .ant-modal-confirm-title {
+      font: 700 20px "Inter Variable", sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+
+    .ant-modal-confirm-content {
+      font: 300 14px "Inter Variable", sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+  }
+
+  .ant-modal-confirm-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 0;
+    gap: 0;
+    border-top: 1px solid #cbcbcf;
+    background: #cbcbcf;
+    gap: 1px;
+    font-family: "Inter Variable", sans-serif;
+
+    button {
+      margin: 0;
+      display: block;
+      margin-left: 0 !important;
+      border-radius: 0;
+      border: none;
+      height: 40px;
+      background-color: white !important;
+      color: gray !important;
+      font-weight: 500;
+
+      &:hover {
+        color: black !important;
+      }
+      &.ant-btn-primary {
+        color: red !important;
+      }
+    }
+  }
+}
+
+.ant-modal-wrap:has(.ant-modal-confirm) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.ant-modal-confirm {
+  position: static;
+  margin: 0;
+  max-width: 350px;
+}
+
+.ant-upload-list-item {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto;
+}
+
+.ant-col.ant-form-item-label {
+  padding-bottom: 2px !important;
+}
