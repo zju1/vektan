@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  ShoppingCart,
   DollarSign,
   Factory,
   Package,
@@ -26,11 +25,6 @@ export const navigationData = {
       title: "clients",
       url: "/clients",
       icon: Users,
-    },
-    {
-      title: "purchase",
-      icon: ShoppingCart,
-      url: "/purchases",
     },
     {
       title: "sale",
@@ -66,6 +60,14 @@ export const navigationData = {
         {
           title: "products",
           url: "/warehouse/products",
+        },
+        {
+          title: "purchase-orders",
+          url: "/warehouse/purchase-orders",
+        },
+        {
+          title: "transfer-orders",
+          url: "/warehouse/transfer-orders",
         },
       ],
     },

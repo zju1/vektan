@@ -68,6 +68,18 @@ export function ProductPage() {
       render: (category: CategoryDTO) => category.name,
     },
     {
+      title: t("type"),
+      dataIndex: "type",
+      key: "type",
+      width: 150,
+      render: () =>
+        t(
+          ["mainRawMaterial", "helpingRawMaterial"][
+            Math.floor(Math.random() * 2)
+          ]
+        ),
+    },
+    {
       title: t("unitType"),
       dataIndex: "unitType",
       key: "unitType",

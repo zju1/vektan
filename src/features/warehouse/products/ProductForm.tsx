@@ -152,13 +152,31 @@ export default function ProductFormModal() {
                 <Input />
               </Form.Item>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Form.Item
                   name="categoryId"
                   label={t("category")}
                   rules={[{ required: true, message: t("required") }]}
                 >
                   <TreeSelect allowClear treeData={categoryOptions} />
+                </Form.Item>
+                <Form.Item
+                  name="type"
+                  label={t("type")}
+                  rules={[{ required: true, message: t("required") }]}
+                >
+                  <Select
+                    options={[
+                      {
+                        label: t("mainRawMaterial"),
+                        value: "mainRawMaterial",
+                      },
+                      {
+                        label: t("helpingRawMaterial"),
+                        value: "helpingRawMaterial",
+                      },
+                    ]}
+                  />
                 </Form.Item>
 
                 <Form.Item

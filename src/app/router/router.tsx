@@ -23,6 +23,8 @@ import { UnitTypesPage } from "@/features/settings/unit-types/UnitTypesPage";
 import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
 import { CategoryPage } from "@/features/warehouse/categories/CategoriesPage";
 import { ProductPage } from "@/features/warehouse/products/ProductsPage";
+import NewTransferOrder from "@/features/warehouse/transfer-orders/NewTransferOrder";
+import { TransferOrders } from "@/features/warehouse/transfer-orders/TransferTable";
 import { MainLayout } from "@/lib/layout/MainLayout";
 import { createBrowserRouter } from "react-router-dom";
 
@@ -104,15 +106,19 @@ export const router = createBrowserRouter([
         element: <CurrenciesPage />,
       },
       {
-        path: "purchases",
+        path: "warehouse/purchase-orders",
         element: <PurchasePage />,
       },
       {
-        path: "purchases/new",
-        element: <PurchaseFormPage />,
+        path: "warehouse/transfer-orders/new",
+        element: <NewTransferOrder />,
       },
       {
-        path: "purchases/edit/:id",
+        path: "warehouse/transfer-orders",
+        element: <TransferOrders />,
+      },
+      {
+        path: "warehouse/purchase-orders/new",
         element: <PurchaseFormPage />,
       },
       {

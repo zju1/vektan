@@ -161,5 +161,7 @@
   "purchasingAgent": "Xarid agenti",
   "productionAgent": "Ishlab chiqarish agenti",
   "productionPlanning": "Ishlab chiqarishni rejalashtirish",
-  "qualityControl": "Sifat nazorati"
+  "qualityControl": "Sifat nazorati",
+  "mainRawMaterial": "Asosiy xom ashyo",
+  "helpingRawMaterial": "Yordamchi xom ashyo"
 }

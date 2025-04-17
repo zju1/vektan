@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Table, Tag } from "antd";
+import { Button, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 
 interface OrderData {
   key: string;
@@ -146,6 +147,14 @@ export default function ProductionPlanningTable() {
 
   const columns: ColumnsType<OrderData> = [
     {
+      title: "№",
+      dataIndex: "index",
+      key: "_id",
+      render: (_value, _record, index) => index + 1,
+      width: 40,
+      align: "center",
+    },
+    {
       title: "УЗЛМП",
       dataIndex: "uzlmp",
       key: "uzlmp",
@@ -255,6 +264,20 @@ export default function ProductionPlanningTable() {
       dataIndex: "shippingLocation",
       key: "shippingLocation",
       width: 150,
+    },
+    {
+      title: "Действии", // actions
+      key: "actions",
+      width: 80,
+      align: "right",
+      fixed: "right",
+      render: (_) => (
+        <div className="flex items-center gap-2">
+          <Button type="text" size="small" icon={<EyeOutlined />} />
+          <Button type="text" size="small" icon={<EditOutlined />} />
+          <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+        </div>
+      ),
     },
   ];
 

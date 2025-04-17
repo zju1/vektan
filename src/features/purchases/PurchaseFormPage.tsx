@@ -1,130 +1,82 @@
+"use client";
+
 import {
   Form,
   Input,
+  InputNumber,
   Select,
   Button,
-  message,
-  Spin,
-  DatePicker,
-  InputNumber,
   Upload,
   Card,
   Breadcrumb,
   Space,
+  DatePicker,
+  Divider,
 } from "antd";
-import {
-  purchaseTypeOptions,
-  paymentStatusOptions,
-  productStatusOptions,
-  type PurchaseDTO,
-} from "./purchase.dto";
-import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import locale from "antd/lib/date-picker/locale/ru_RU";
+import dayjs from "dayjs";
+import "dayjs/locale/ru";
 
 import {
   UploadOutlined,
   SaveOutlined,
   ArrowLeftOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
-import TextArea from "antd/es/input/TextArea";
 
-// Assuming these queries are available in your application
-import { useGetSuppliersQuery } from "@/app/store/services/suppliers.api";
-import {
-  useCreatePurchaseMutation,
-  useGetPurchaseByIdQuery,
-  useUpdatePurchaseMutation,
-} from "@/app/store/services/purchase.api";
-import { useGetDepartmentsQuery } from "@/app/store/services/admin";
-import {
-  useGetCurrenciesQuery,
-  useGetLogisticsCompaniesQuery,
-} from "@/app/store/services/settings.api";
-import { useFiles } from "@/hooks/useFiles";
-import dayjs from "dayjs";
 import type { RcFile } from "antd/es/upload";
-import { File } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+dayjs.locale("ru");
+const { TextArea } = Input;
+const { Option } = Select;
 
 export function PurchaseFormPage() {
-  const { t } = useTranslation();
-  const [form] = Form.useForm<PurchaseDTO>();
+  const [form] = Form.useForm();
+  const navi = useNavigate();
   const [fileList, setFileList] = useState<any[]>([]);
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const [loading, setLoading] = useState(false);
 
-  // API integration for CRUD operations
-  const [createPurchase, { isLoading: isCreating }] =
-    useCreatePurchaseMutation();
-  const [updatePurchase, { isLoading: isUpdating }] =
-    useUpdatePurchaseMutation();
-  const { data: purchaseData, isLoading: isLoadingPurchase } =
-    useGetPurchaseByIdQuery(id || null, {
-      skip: !id,
-      refetchOnFocus: true,
-      refetchOnMountOrArgChange: true,
-    });
+  // Mock data for select options
+  const suppliers = [
+    { id: "1", name: "ООО Поставщик", contactName: "Иванов И.И." },
+    { id: "2", name: "АО Снабжение", contactName: "Петров П.П." },
+    { id: "3", name: "ИП Иванов", contactName: "Иванов А.А." },
+    { id: "4", name: "ЗАО ТехноСнаб", contactName: "Сидоров С.С." },
+    { id: "5", name: "ООО ПромРесурс", contactName: "Кузнецов К.К." },
+  ];
 
-  // API integration for reference data
-  const { data: suppliers } = useGetSuppliersQuery();
-  const { data: departments } = useGetDepartmentsQuery();
-  const { data: logisticsServices } = useGetLogisticsCompaniesQuery();
-  const { data: currencies } = useGetCurrenciesQuery();
+  const manufacturers = [
+    "ООО Производитель",
+    "АО ПромТех",
+    "ЗАО Индустрия",
+    "ООО ТехноПром",
+    "ИП Сидоров",
+  ];
+
+  const units = ["шт", "кг", "л", "м", "уп", "компл"];
+
   const [defaultFiles, setDefaultFiles] = useState<
     { name: string; fileUrl: string }[]
   >([]);
 
-  const { handleUpload, isLoading: uploading } = useFiles();
-
-  const isEditMode = !!id;
-  const isLoading = isCreating || isUpdating || isLoadingPurchase;
-
-  useEffect(() => {
-    if (purchaseData && isEditMode) {
-      // Convert date strings to moment objects for DatePicker
-      form.setFieldsValue(purchaseData);
-
-      // Set file list if specifications exist
-      if (
-        purchaseData.specifications &&
-        purchaseData.specifications.length > 0
-      ) {
-        setDefaultFiles(purchaseData.specifications);
-        setFileList([]);
-      }
-    }
-  }, [purchaseData, form, isEditMode]);
-
   const handleSupplierChange = (value: string) => {
-    const supplier = suppliers?.find((s) => s._id === value);
+    const supplier = suppliers.find((s) => s.id === value);
     if (supplier) {
-      form.setFieldsValue({ supplierCompanyName: supplier.companyName });
+      form.setFieldsValue({ supplierCompanyName: supplier.name });
     }
   };
 
   const handleSubmit = async (values: any) => {
-    try {
-      const newFiles = [];
-      if (fileList.length > 0) {
-        const uploadedFiles = await handleUpload(fileList);
-        newFiles.push(...uploadedFiles);
-      }
-      const formattedValues = {
-        ...values,
-        specifications: [...defaultFiles, ...newFiles],
-      };
+    setLoading(true);
+    console.log("Form values:", values);
 
-      if (isEditMode && id) {
-        await updatePurchase({ purchase: formattedValues, id }).unwrap();
-      } else {
-        await createPurchase(formattedValues).unwrap();
-      }
-      message.success(t("saved"));
-      navigate("/purchases");
-    } catch (error) {
-      console.log(error);
-      message.error(t("errorOccuredInCRUD"));
-    }
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      navi("/warehouse/purchase-orders"); // Redirect to main page after success
+    }, 1500);
   };
 
   const uploadProps = {
@@ -146,46 +98,40 @@ export function PurchaseFormPage() {
     fileList,
   };
 
-  if (isLoadingPurchase && isEditMode) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Spin size="large" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6 mx-auto w-full max-w-4xl">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 mx-auto w-full max-w-6xl p-4 md:p-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <Breadcrumb
             items={[
               {
                 title: (
-                  <a onClick={() => navigate("/purchases")}>{t("purchases")}</a>
+                  <a onClick={() => navi("/warehouse/purchase-orders")}>
+                    Закупки
+                  </a>
                 ),
               },
-              { title: isEditMode ? t("editPurchase") : t("newPurchase") },
+              { title: "Новая закупка" },
             ]}
           />
           <h1 className="text-2xl font-bold mt-2">
-            {isEditMode ? t("editPurchase") : t("newPurchase")}
+            Создание нового заказа на закупку
           </h1>
         </div>
         <Space>
           <Button
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate("/purchases")}
+            onClick={() => navi("/warehouse/purchase-orders")}
           >
-            {t("back")}
+            Назад
           </Button>
           <Button
             type="primary"
             icon={<SaveOutlined />}
-            loading={isLoading || uploading}
             onClick={() => form.submit()}
+            loading={loading}
           >
-            {t("save")}
+            Сохранить
           </Button>
         </Space>
       </div>
@@ -195,267 +141,255 @@ export function PurchaseFormPage() {
         layout="vertical"
         onFinish={handleSubmit}
         className="space-y-6"
+        initialValues={{
+          dateOfLastModification: dayjs(),
+        }}
       >
-        {/* Basic Information */}
         <Card
           title={
-            <span className="text-lg font-medium">{t("basicInformation")}</span>
+            <span className="text-lg font-medium">Основная информация</span>
           }
           className="shadow-sm"
         >
-          <div className="grid gap-2">
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="applicationNumber"
-                label={t("applicationNumber")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name="purchaseType"
-                label={t("purchaseType")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Select>
-                  {purchaseTypeOptions.map((option) => (
-                    <Select.Option key={option.value} value={option.value}>
-                      {t(option.label)}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Form.Item
-              name="uniqueDescription"
-              label={t("uniqueDescription")}
-              rules={[{ required: true, message: t("required") }]}
+              name="receiptDate"
+              label="Дата поступления"
+              rules={[{ required: true, message: "Обязательное поле" }]}
             >
-              <Input />
+              <DatePicker
+                locale={locale}
+                format="DD.MM.YYYY"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
-          </div>
-        </Card>
-
-        {/* Supplier & Department Information */}
-        <Card
-          title={
-            <span className="text-lg font-medium">
-              {t("organizationInformation")}
-            </span>
-          }
-          className="shadow-sm"
-        >
-          <div className="grid gap-2">
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="supplierId"
-                label={t("supplier")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Select
-                  onChange={handleSupplierChange}
-                  showSearch
-                  optionFilterProp="children"
-                >
-                  {suppliers?.map((supplier) => (
-                    <Select.Option key={supplier._id} value={supplier._id}>
-                      {supplier.contactName}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item
-                name="supplierCompanyName"
-                label={t("supplierCompanyName")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Input disabled />
-              </Form.Item>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="departmentId"
-                label={t("department")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Select showSearch optionFilterProp="children">
-                  {departments?.map((department) => (
-                    <Select.Option key={department._id} value={department._id}>
-                      {department.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item
-                name="logisticsServiceId"
-                label={t("logisticsService")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Select showSearch optionFilterProp="children">
-                  {logisticsServices?.map((service) => (
-                    <Select.Option key={service._id} value={service._id}>
-                      {service.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </div>
             <Form.Item
-              name="initiator"
-              label={t("initiator")}
-              rules={[{ required: true, message: t("required") }]}
+              name="invoiceNumber"
+              label="Номер накладной"
+              rules={[{ required: true, message: "Обязательное поле" }]}
             >
-              <Input />
+              <Input placeholder="Введите номер накладной" />
             </Form.Item>
-          </div>
-        </Card>
-
-        {/* Contract Details */}
-        <Card
-          title={
-            <span className="text-lg font-medium">{t("contractDetails")}</span>
-          }
-          className="shadow-sm"
-        >
-          <div className="grid gap-2">
-            <div className="grid grid-cols-3 gap-4">
-              <Form.Item
-                name="contractDate"
-                label={t("contractDate")}
-                getValueProps={(value) => ({
-                  value: value ? dayjs(value) : "",
-                })}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <DatePicker className="w-full" />
-              </Form.Item>
-              <Form.Item
-                name="deliveryTerms"
-                label={t("deliveryTerms")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                name="contractQuantities"
-                label={t("contractQuantities")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Input />
-              </Form.Item>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Form.Item
-                name="quota"
-                label={t("quota")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item name="refund" label={t("refund")}>
-                <Input />
-              </Form.Item>
-            </div>
-          </div>
-        </Card>
-
-        {/* Financial Information */}
-        <Card
-          title={
-            <span className="text-lg font-medium">
-              {t("financialInformation")}
-            </span>
-          }
-          className="shadow-sm"
-        >
-          <div className="grid gap-2">
-            <div className="grid grid-cols-3 gap-4">
-              <Form.Item
-                name="currencyId"
-                label={t("currency")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <Select showSearch optionFilterProp="children">
-                  {currencies?.map((currency) => (
-                    <Select.Option key={currency._id} value={currency._id}>
-                      {currency.code} - {currency.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item
-                name="price"
-                label={t("price")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <InputNumber className="w-full" min={0} precision={2} />
-              </Form.Item>
-              <Form.Item
-                name="cost"
-                label={t("cost")}
-                rules={[{ required: true, message: t("required") }]}
-              >
-                <InputNumber className="w-full" min={0} precision={2} />
-              </Form.Item>
-            </div>
             <Form.Item
-              name="paymentStatus"
-              label={t("paymentStatus")}
-              rules={[{ required: true, message: t("required") }]}
+              name="supplierId"
+              label="Поставщик"
+              rules={[{ required: true, message: "Обязательное поле" }]}
             >
-              <Select>
-                {paymentStatusOptions.map((option) => (
-                  <Select.Option key={option.value} value={option.value}>
-                    {t(option.label)}
-                  </Select.Option>
+              <Select
+                onChange={handleSupplierChange}
+                showSearch
+                optionFilterProp="children"
+                placeholder="Выберите поставщика"
+                dropdownRender={(menu) => (
+                  <>
+                    {menu}
+                    <Divider style={{ margin: "8px 0" }} />
+                    <Button type="text" icon={<PlusOutlined />} block>
+                      Добавить нового поставщика
+                    </Button>
+                  </>
+                )}
+              >
+                {suppliers.map((supplier) => (
+                  <Option key={supplier.id} value={supplier.id}>
+                    {supplier.contactName}
+                  </Option>
                 ))}
               </Select>
             </Form.Item>
+            <Form.Item
+              name="supplierCompanyName"
+              label="Название компании поставщика"
+            >
+              <Input disabled />
+            </Form.Item>
           </div>
         </Card>
 
-        {/* Product Information */}
         <Card
           title={
-            <span className="text-lg font-medium">
-              {t("productInformation")}
-            </span>
+            <span className="text-lg font-medium">Информация о сырье</span>
           }
           className="shadow-sm"
         >
-          <div className="grid gap-2">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Form.Item
-              name="productStatus"
-              label={t("productStatus")}
-              rules={[{ required: true, message: t("required") }]}
+              name="rawMaterialName"
+              label="Наименование сырья"
+              rules={[{ required: true, message: "Обязательное поле" }]}
             >
-              <Select>
-                {productStatusOptions.map((option) => (
-                  <Select.Option key={option.value} value={option.value}>
-                    {t(option.label)}
-                  </Select.Option>
+              <Input placeholder="Введите наименование сырья" />
+            </Form.Item>
+            <Form.Item
+              name="id"
+              label="ID (классификатор)"
+              rules={[{ required: true, message: "Обязательное поле" }]}
+            >
+              <Input placeholder="Введите ID" />
+            </Form.Item>
+            <Form.Item
+              name="unit"
+              label="Единица измерения"
+              rules={[{ required: true, message: "Обязательное поле" }]}
+            >
+              <Select placeholder="Выберите единицу измерения">
+                {units.map((unit) => (
+                  <Option key={unit} value={unit}>
+                    {unit}
+                  </Option>
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name="purpose" label={t("purpose")}>
-              <TextArea rows={3} />
+            <Form.Item
+              name="quantity"
+              label="Количество"
+              rules={[{ required: true, message: "Обязательное поле" }]}
+            >
+              <InputNumber min={1} style={{ width: "100%" }} />
             </Form.Item>
-            <Form.Item name="comments" label={t("comments")}>
-              <TextArea rows={3} />
+            <Form.Item
+              name="pricePerUnit"
+              label="Цена за единицу"
+              rules={[{ required: true, message: "Обязательное поле" }]}
+            >
+              <InputNumber
+                min={0}
+                step={0.01}
+                precision={2}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+            <Form.Item name="sum" label="Сумма">
+              <InputNumber
+                min={0}
+                step={0.01}
+                precision={2}
+                style={{ width: "100%" }}
+                disabled
+              />
+            </Form.Item>
+            <Form.Item name="lotBatch" label="Лот/Партия">
+              <Input placeholder="Введите номер партии" />
+            </Form.Item>
+            <Form.Item name="expirationDate" label="Срок годности">
+              <DatePicker
+                locale={locale}
+                format="DD.MM.YYYY"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+            <Form.Item name="manufacturer" label="Производитель">
+              <Select
+                showSearch
+                optionFilterProp="children"
+                placeholder="Выберите производителя"
+                dropdownRender={(menu) => (
+                  <>
+                    {menu}
+                    <Divider style={{ margin: "8px 0" }} />
+                    <Button type="text" icon={<PlusOutlined />} block>
+                      Добавить нового производителя
+                    </Button>
+                  </>
+                )}
+              >
+                {manufacturers.map((manufacturer) => (
+                  <Option key={manufacturer} value={manufacturer}>
+                    {manufacturer}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="certificate" label="Сертификат">
+              <Input placeholder="Введите номер сертификата" />
             </Form.Item>
           </div>
         </Card>
 
-        {/* Specifications & Documents */}
         <Card
           title={
             <span className="text-lg font-medium">
-              {t("documentsAndSpecifications")}
+              Результаты лабораторного анализа
             </span>
           }
           className="shadow-sm"
         >
-          <Form.Item label={t("specifications")}>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Form.Item name="penetration" label="Пенетрация">
+              <InputNumber min={0} style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item name="viscosity" label="Вязкость">
+              <InputNumber min={0} style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item
+              name="softeningTemperature"
+              label="Температура размягчения"
+            >
+              <InputNumber min={0} style={{ width: "100%" }} suffix="°C" />
+            </Form.Item>
+            <Form.Item name="dropPoint" label="Точка падения">
+              <InputNumber min={0} style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item name="temperature" label="Температура">
+              <InputNumber min={0} style={{ width: "100%" }} suffix="°C" />
+            </Form.Item>
+          </div>
+        </Card>
+
+        <Card
+          title={
+            <span className="text-lg font-medium">
+              Дополнительная информация
+            </span>
+          }
+          className="shadow-sm"
+        >
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Form.Item
+              name="comments"
+              label="Комментарии"
+              className="md:col-span-2"
+            >
+              <TextArea rows={3} placeholder="Введите комментарии" />
+            </Form.Item>
+            <Form.Item
+              name="additionalColumn1"
+              label="Дополнительный столбец 1"
+            >
+              <Input placeholder="Введите дополнительную информацию" />
+            </Form.Item>
+            <Form.Item
+              name="additionalColumn2"
+              label="Дополнительный столбец 2"
+            >
+              <Input placeholder="Введите дополнительную информацию" />
+            </Form.Item>
+            <Form.Item
+              name="additionalColumn3"
+              label="Дополнительный столбец 3"
+            >
+              <Input placeholder="Введите дополнительную информацию" />
+            </Form.Item>
+            <Form.Item
+              name="additionalColumn4"
+              label="Дополнительный столбец 4"
+            >
+              <Input placeholder="Введите дополнительную информацию" />
+            </Form.Item>
+            <Form.Item
+              name="additionalColumn5"
+              label="Дополнительный столбец 5"
+            >
+              <Input placeholder="Введите дополнительную информацию" />
+            </Form.Item>
+          </div>
+        </Card>
+
+        <Card
+          title={<span className="text-lg font-medium">Документы</span>}
+          className="shadow-sm"
+        >
+          <Form.Item label="Сертификаты и документация">
             <Upload
               {...uploadProps}
               multiple
@@ -464,13 +398,12 @@ export function PurchaseFormPage() {
               accept={undefined}
               method={undefined}
               openFileDialogOnClick
-              hasControlInside
             >
-              <Button icon={<UploadOutlined />}>{t("uploadFiles")}</Button>
+              <Button icon={<UploadOutlined />}>Загрузить файлы</Button>
             </Upload>
             {defaultFiles.length > 0 && (
               <div className="mt-4">
-                <h4 className="text-sm font-medium">{t("uploadedFiles")}</h4>
+                <h4 className="text-sm font-medium">Загруженные файлы</h4>
                 <ul className="mt-2 grid">
                   {defaultFiles.map((file) => (
                     <li
@@ -481,9 +414,8 @@ export function PurchaseFormPage() {
                         href={file.fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-brand-main py-2 flex-1"
+                        className="flex items-center gap-2 text-blue-600 py-2 flex-1"
                       >
-                        <File className="size-4" />
                         {file.name}
                       </a>
                       <Button
@@ -496,7 +428,7 @@ export function PurchaseFormPage() {
                           );
                         }}
                       >
-                        {t("delete")}
+                        Удалить
                       </Button>
                     </li>
                   ))}
@@ -507,14 +439,16 @@ export function PurchaseFormPage() {
         </Card>
 
         <div className="flex justify-end space-x-4 py-4">
-          <Button onClick={() => navigate("/purchases")}>{t("cancel")}</Button>
+          <Button onClick={() => navi("/warehouse/purchase-orders")}>
+            Отмена
+          </Button>
           <Button
             type="primary"
             htmlType="submit"
-            loading={isLoading || uploading}
             icon={<SaveOutlined />}
+            loading={loading}
           >
-            {t("save")}
+            Сохранить
           </Button>
         </div>
       </Form>

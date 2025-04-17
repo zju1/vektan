@@ -147,5 +147,11 @@
   "en": "Английский",
   "kaa": "Каракалпакский",
   "erp": "ERP",
-  "aiAgents": "AI агенты"
+  "aiAgents": "AI агенты",
+  "productionPlanning": "Планирование производства",
+  "qualityControl": "Контроль качества",
+  "mainRawMaterial": "Основное сырье",
+  "helpingRawMaterial": "Вспомогательное сырье",
+  "transfer-orders": "Перемещение товаров",
+  "purchase-orders": "Заказы на закупку"
 }

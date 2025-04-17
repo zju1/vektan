@@ -7,6 +7,9 @@ import {
   SearchOutlined,
   FilterOutlined,
   InfoCircleOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 
 const { RangePicker } = DatePicker;
@@ -485,6 +488,20 @@ export function QualityControlTable() {
       dataIndex: "notes",
       key: "notes",
       width: 150,
+    },
+    {
+      title: "Действии", // actions
+      key: "actions",
+      width: 80,
+      align: "right",
+      fixed: "right",
+      render: (_) => (
+        <div className="flex items-center gap-2">
+          <Button type="text" size="small" icon={<EyeOutlined />} />
+          <Button type="text" size="small" icon={<EditOutlined />} />
+          <Button type="text" size="small" danger icon={<DeleteOutlined />} />
+        </div>
+      ),
     },
   ];
 
