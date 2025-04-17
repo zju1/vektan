@@ -153,5 +153,15 @@
   "mainRawMaterial": "Основное сырье",
   "helpingRawMaterial": "Вспомогательное сырье",
   "transfer-orders": "Перемещение товаров",
-  "purchase-orders": "Заказы на закупку"
+  "purchase-orders": "Заказы на закупку",
+  "autoPlanning": "Авто-планирование",
+  "clientOrders": "Заказы клиентов",
+  "shipments": "Отгрузки",
+  "priceHistory": "История цен",
+  "stockAnalysis": "Анализ остатков",
+  "roles": "Роли",
+  "acceptanceOfProducts": "Приемка товаров",
+  "newAcceptance": "Новая приемка",
+  "acceptNewProducts": "Принять новые товары",
+  "purchaseItems": "Закупки товаров"
 }

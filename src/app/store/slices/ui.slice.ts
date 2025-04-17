@@ -6,7 +6,7 @@ interface IUISlice {
 }
 
 const initialState: IUISlice = {
-  language: "uz",
+  language: "ru",
   app: "erp",
 };
 

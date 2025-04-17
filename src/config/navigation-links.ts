@@ -1,17 +1,15 @@
 import {
   LayoutDashboard,
-  Users,
   DollarSign,
   Factory,
   Package,
-  Truck,
   Shield,
   Settings,
-  Container,
   Bot,
   Book,
   Cog,
   ChartArea,
+  ShoppingCart,
 } from "lucide-react";
 
 export const navigationData = {
@@ -22,22 +20,60 @@ export const navigationData = {
       icon: LayoutDashboard,
     },
     {
-      title: "clients",
-      url: "/clients",
-      icon: Users,
+      title: "purchases",
+      icon: ShoppingCart,
+      items: [
+        {
+          title: "purchaseItems",
+          url: "/purchases/orders",
+        },
+        {
+          title: "suppliers",
+          url: "/purchases/suppliers",
+        },
+        {
+          title: "priceHistory",
+          url: "/purchases/price-history",
+        },
+        {
+          title: "stockAnalysis",
+          url: "/purchases/stock-analysis",
+        },
+      ],
     },
     {
       title: "sale",
       icon: DollarSign,
-      url: "/sales",
+      items: [
+        {
+          title: "logistics",
+          url: "/sales/logistics",
+        },
+        {
+          title: "clientOrders",
+          url: "/sales/client-orders",
+        },
+        {
+          title: "clients",
+          url: "/sales/clients",
+        },
+        {
+          title: "shipments",
+          url: "/sales/shipments",
+        },
+      ],
     },
     {
       title: "production",
       icon: Factory,
       items: [
         {
+          title: "autoPlanning",
+          url: "/production/auto-planning",
+        },
+        {
           title: "productionPlanning",
-          url: "/production/production-planning",
+          url: "/production/planning",
         },
         {
           title: "production",
@@ -62,24 +98,14 @@ export const navigationData = {
           url: "/warehouse/products",
         },
         {
-          title: "purchase-orders",
-          url: "/warehouse/purchase-orders",
+          title: "acceptanceOfProducts",
+          url: "/warehouse/acceptance-orders",
         },
         {
           title: "transfer-orders",
           url: "/warehouse/transfer-orders",
         },
       ],
-    },
-    {
-      title: "suppliers",
-      url: "/suppliers",
-      icon: Container,
-    },
-    {
-      title: "logistics",
-      url: "/logistics",
-      icon: Truck,
     },
     {
       title: "administration",
@@ -106,6 +132,10 @@ export const navigationData = {
         {
           title: "currencies",
           url: "/settings/currencies",
+        },
+        {
+          title: "roles",
+          url: "/settings/roles",
         },
       ],
     },

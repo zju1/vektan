@@ -27,6 +27,7 @@ import {
 
 import type { RcFile } from "antd/es/upload";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 dayjs.locale("ru");
 const { TextArea } = Input;
@@ -98,6 +99,8 @@ export function PurchaseFormPage() {
     fileList,
   };
 
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6 mx-auto w-full max-w-6xl p-4 md:p-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -107,16 +110,14 @@ export function PurchaseFormPage() {
               {
                 title: (
                   <a onClick={() => navi("/warehouse/purchase-orders")}>
-                    Закупки
+                    Приемка товаров
                   </a>
                 ),
               },
-              { title: "Новая закупка" },
+              { title: t("newAcceptance") },
             ]}
           />
-          <h1 className="text-2xl font-bold mt-2">
-            Создание нового заказа на закупку
-          </h1>
+          <h1 className="text-2xl font-bold mt-2">{t("acceptNewProducts")}</h1>
         </div>
         <Space>
           <Button

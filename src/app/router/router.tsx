@@ -106,8 +106,12 @@ export const router = createBrowserRouter([
         element: <CurrenciesPage />,
       },
       {
-        path: "warehouse/purchase-orders",
+        path: "warehouse/acceptance-orders",
         element: <PurchasePage />,
+      },
+      {
+        path: "warehouse/acceptance-orders/new",
+        element: <PurchaseFormPage />,
       },
       {
         path: "warehouse/transfer-orders/new",
@@ -116,10 +120,6 @@ export const router = createBrowserRouter([
       {
         path: "warehouse/transfer-orders",
         element: <TransferOrders />,
-      },
-      {
-        path: "warehouse/purchase-orders/new",
-        element: <PurchaseFormPage />,
       },
       {
         path: "logistics",

@@ -238,7 +238,9 @@ export function PurchasePage() {
 
   return (
     <div className="grid gap-4">
-      <h1 className="font-sans font-bold text-2xl">{t("purchases")}</h1>
+      <h1 className="font-sans font-bold text-2xl">
+        {t("acceptanceOfProducts")}
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2">
         <Search placeholder={t("search")} />
         <div className="flex items-center justify-end gap-2">
@@ -246,9 +248,9 @@ export function PurchasePage() {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate("/warehouse/purchase-orders/new")}
+            onClick={() => navigate("/warehouse/acceptance-orders/new")}
           >
-            {t("newPurchase")}
+            {t("newAcceptance")}
           </Button>
         </div>
       </div>

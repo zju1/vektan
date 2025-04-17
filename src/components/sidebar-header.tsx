@@ -46,17 +46,17 @@ export function SiteHeader() {
           placement="bottomRight"
           menu={{
             items: [
-              {
+              /* {
                 key: "uz",
                 label: "O'zbekcha",
                 onClick: () => handleLanguageChange("uz"),
-              },
+              }, */
               {
                 key: "ru",
                 label: "Русский",
                 onClick: () => handleLanguageChange("ru"),
               },
-              {
+              /* {
                 key: "en",
                 label: "English",
                 onClick: () => handleLanguageChange("en"),
@@ -65,7 +65,7 @@ export function SiteHeader() {
                 key: "kaa",
                 label: "Qaraqalpaqsha",
                 onClick: () => handleLanguageChange("kaa"),
-              },
+              }, */
             ],
           }}
         >
