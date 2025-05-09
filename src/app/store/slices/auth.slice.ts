@@ -7,8 +7,18 @@ interface IAuthSlice {
 }
 
 const initialState: IAuthSlice = {
-  user: null,
-  access_token: null,
+  user: {
+    _id: "67f4268f782d063b42c6cb9a",
+    username: "ucatco",
+    firstName: "Azamat",
+    lastName: "Jumabaev",
+    role: "admin",
+    lastLogin: "2025-05-09T20:30:43.458Z",
+    createdAt: "2025-04-07T19:25:03.521Z",
+    updatedAt: "2025-05-09T20:30:43.459Z",
+  },
+  access_token:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZjQyNjhmNzgyZDA2M2I0MmM2Y2I5YSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc0NDA1ODQyNiwiZXhwIjoxNzc1NTk0NDI2fQ.0Sueb4Qg7fC78CHK5ypLU0nwx8SjeMohftpB8vwiv3M",
 };
 
 const authSlice = createSlice({

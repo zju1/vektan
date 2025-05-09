@@ -25,9 +25,9 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   role: "admin" | "manager";
-  createdAt: Date;
-  updatedAt: Date;
-  lastLogin?: Date;
+  createdAt: string;
+  updatedAt: string;
+  lastLogin?: string;
   _id: string;
 }
 
