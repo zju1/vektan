@@ -68,20 +68,12 @@ export const navigationData = {
       icon: Factory,
       items: [
         {
-          title: "autoPlanning",
-          url: "/production/auto-planning",
+          title: "Заказы",
+          url: "/production/orders",
         },
         {
-          title: "productionPlanning",
-          url: "/production/planning",
-        },
-        {
-          title: "production",
-          url: "/production/production",
-        },
-        {
-          title: "qualityControl",
-          url: "/production/quality-control",
+          title: "Процессы",
+          url: "/production/processes",
         },
       ],
     },
@@ -90,20 +82,20 @@ export const navigationData = {
       icon: Package,
       items: [
         {
-          title: "categories",
-          url: "/warehouse/categories",
+          title: "Анализ остатков",
+          url: "/warehouse/analyze",
         },
         {
-          title: "products",
-          url: "/warehouse/products",
+          title: "Учет и Приемка основного сырья",
+          url: "/warehouse/fabricants",
         },
         {
-          title: "acceptanceOfProducts",
-          url: "/warehouse/acceptance-orders",
+          title: "Учет и Приемка вспомогательного сырья",
+          url: "/warehouse/helper-fabricants",
         },
         {
-          title: "transfer-orders",
-          url: "/warehouse/transfer-orders",
+          title: "Перемещение товаров",
+          url: "/warehouse/transfer-items",
         },
       ],
     },

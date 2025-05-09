@@ -13,18 +13,17 @@ import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import LoginPage from "@/features/LoginPage";
 import { LogisticsPage } from "@/features/logistics/LogisticsPage";
 import NotFoundPage from "@/features/NotFound";
-import { ProductionPage } from "@/features/production/planning/ProductionPage";
-import { ProductionPlanningPage } from "@/features/production/production/ProductionPlanningPage";
-import { QControlPage } from "@/features/production/quality-control/QCPage";
-import { PurchaseFormPage } from "@/features/purchases/PurchaseFormPage";
+import { ProductionOrdersPage } from "@/features/production/orders/ProductionOrders";
+import { ProductionProcessesPage } from "@/features/production/processes/ProductionProcesses";
 import { PurchasePage } from "@/features/purchases/PurchasesPage";
+import { ClientOrdersPage } from "@/features/sales/ClientOrders";
 import { CurrenciesPage } from "@/features/settings/currencies/CurrenciesPage";
 import { UnitTypesPage } from "@/features/settings/unit-types/UnitTypesPage";
 import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
-import { CategoryPage } from "@/features/warehouse/categories/CategoriesPage";
-import { ProductPage } from "@/features/warehouse/products/ProductsPage";
-import NewTransferOrder from "@/features/warehouse/transfer-orders/NewTransferOrder";
-import { TransferOrders } from "@/features/warehouse/transfer-orders/TransferTable";
+import { StockAnalyzePage } from "@/features/warehouse/analyze/StockAnalyze";
+import { Fabricants } from "@/features/warehouse/fabricants/FabricantsPage";
+import { HelperFabricantsPage } from "@/features/warehouse/helper-fabricants/HelperFabricantsPage";
+import { TransferItems } from "@/features/warehouse/transfers/Transfers";
 import { MainLayout } from "@/lib/layout/MainLayout";
 import { createBrowserRouter } from "react-router-dom";
 
@@ -38,20 +37,42 @@ export const router = createBrowserRouter([
         element: <DashboardPage />,
       },
       {
+        path: "production",
+        children: [
+          {
+            path: "orders",
+            element: <ProductionOrdersPage />,
+          },
+          {
+            path: "processes",
+            element: <ProductionProcessesPage />,
+          },
+        ],
+      },
+      {
+        path: "warehouse",
+        children: [
+          {
+            path: "analyze",
+            element: <StockAnalyzePage />,
+          },
+          {
+            path: "fabricants",
+            element: <Fabricants />,
+          },
+          {
+            path: "helper-fabricants",
+            element: <HelperFabricantsPage />,
+          },
+          {
+            path: "transfer-items",
+            element: <TransferItems />,
+          },
+        ],
+      },
+      {
         path: "statistics",
         element: <AIStatisticsPage />,
-      },
-      {
-        path: "production/production-planning",
-        element: <ProductionPlanningPage />,
-      },
-      {
-        path: "production/production",
-        element: <ProductionPage />,
-      },
-      {
-        path: "production/quality-control",
-        element: <QControlPage />,
       },
       {
         path: "knowledge-base",
@@ -86,7 +107,7 @@ export const router = createBrowserRouter([
         element: <ProductionAgentPage />,
       },
       {
-        path: "clients",
+        path: "sales/clients",
         element: <ClientPage />,
       },
       {
@@ -109,17 +130,10 @@ export const router = createBrowserRouter([
         path: "warehouse/acceptance-orders",
         element: <PurchasePage />,
       },
+
       {
-        path: "warehouse/acceptance-orders/new",
-        element: <PurchaseFormPage />,
-      },
-      {
-        path: "warehouse/transfer-orders/new",
-        element: <NewTransferOrder />,
-      },
-      {
-        path: "warehouse/transfer-orders",
-        element: <TransferOrders />,
+        path: "sales/client-orders",
+        element: <ClientOrdersPage />,
       },
       {
         path: "logistics",
@@ -128,14 +142,6 @@ export const router = createBrowserRouter([
       {
         path: "administration/departments",
         element: <DepartmentPage />,
-      },
-      {
-        path: "warehouse/categories",
-        element: <CategoryPage />,
-      },
-      {
-        path: "warehouse/products",
-        element: <ProductPage />,
       },
       {
         path: "*",
