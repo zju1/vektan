@@ -20,6 +20,12 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
+import {
+  useCreateProcessDataMutation,
+  useDeleteProcessDataMutation,
+  useGetProcessDataQuery,
+  useUpdateProcesDataMutation,
+} from "@/app/store/services/sales.api";
 
 interface RawMaterial {
   batchNumber: string;
@@ -27,144 +33,31 @@ interface RawMaterial {
   position: string;
 }
 
-interface ProcessData {
-  id: string;
+export interface ProcessData {
+  _id?: string;
   orderId: string;
   mainComponent: {
     rawMaterial1: RawMaterial;
     rawMaterial2: RawMaterial;
     rawMaterial3: RawMaterial;
   };
-  byProduct: {
-    batchNumber: string;
-    quantity: number;
-    position: string;
-  };
-  additives: {
-    batchNumber: string;
-    quantity: number;
-    position: string;
-  };
+  byProduct: RawMaterial;
+  additives: RawMaterial;
   lotNumber: string;
   notes: string;
 }
 
-const initialData: ProcessData[] = [
-  {
-    id: "1",
-    orderId: "ORD-001",
-    mainComponent: {
-      rawMaterial1: {
-        batchNumber: "L-1",
-        quantity: 15,
-        position: "Склад-ОС-1",
-      },
-      rawMaterial2: {
-        batchNumber: "L-2",
-        quantity: 2,
-        position: "Склад-ОС-2",
-      },
-      rawMaterial3: {
-        batchNumber: "L-3",
-        quantity: 5,
-        position: "Склад-ОС-3",
-      },
-    },
-    byProduct: {
-      batchNumber: "L-PP-001",
-      quantity: 0.5,
-      position: "Склад-ПП-1",
-    },
-    additives: {
-      batchNumber: "L-PP-001",
-      quantity: 0.1,
-      position: "Склад-ПР-1",
-    },
-    lotNumber: "L0512323",
-    notes: "",
-  },
-  {
-    id: "2",
-    orderId: "ORD-002",
-    mainComponent: {
-      rawMaterial1: {
-        batchNumber: "",
-        quantity: 0,
-        position: "",
-      },
-      rawMaterial2: {
-        batchNumber: "",
-        quantity: 0,
-        position: "",
-      },
-      rawMaterial3: {
-        batchNumber: "",
-        quantity: 0,
-        position: "",
-      },
-    },
-    byProduct: {
-      batchNumber: "",
-      quantity: 0,
-      position: "",
-    },
-    additives: {
-      batchNumber: "",
-      quantity: 0,
-      position: "",
-    },
-    lotNumber: "",
-    notes: "",
-  },
-  {
-    id: "3",
-    orderId: "ORD-003",
-    mainComponent: {
-      rawMaterial1: {
-        batchNumber: "",
-        quantity: 0,
-        position: "",
-      },
-      rawMaterial2: {
-        batchNumber: "",
-        quantity: 0,
-        position: "",
-      },
-      rawMaterial3: {
-        batchNumber: "",
-        quantity: 0,
-        position: "",
-      },
-    },
-    byProduct: {
-      batchNumber: "",
-      quantity: 0,
-      position: "",
-    },
-    additives: {
-      batchNumber: "",
-      quantity: 0,
-      position: "",
-    },
-    lotNumber: "",
-    notes: "",
-  },
-];
-
 export function ProductionProcessesPage() {
-  const [data, setData] = useState<ProcessData[]>(initialData);
-  const [searchText, setSearchText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewMode, setIsViewMode] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<ProcessData | null>(null);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const { data, isFetching } = useGetProcessDataQuery({});
 
-  const filteredData = data.filter(
-    (item) =>
-      item.orderId.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.lotNumber.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const [remove] = useDeleteProcessDataMutation();
+  const [create, { isLoading: createLoading }] = useCreateProcessDataMutation();
+  const [update, { isLoading: updateLoading }] = useUpdateProcesDataMutation();
 
   const showModal = (record?: ProcessData, viewOnly = false) => {
     setIsViewMode(viewOnly);
@@ -203,9 +96,8 @@ export function ProductionProcessesPage() {
   };
 
   const handleSubmit = () => {
-    form.validateFields().then((values) => {
+    form.validateFields().then(async (values) => {
       const newRecord: ProcessData = {
-        id: currentRecord ? currentRecord.id : `${data.length + 1}`,
         orderId: values.orderId,
         mainComponent: {
           rawMaterial1: {
@@ -239,14 +131,11 @@ export function ProductionProcessesPage() {
       };
 
       if (currentRecord) {
-        // Update existing record
-        setData(
-          data.map((item) => (item.id === currentRecord.id ? newRecord : item))
-        );
+        await update({ ...newRecord, _id: currentRecord._id });
+
         messageApi.success("Процесс успешно обновлен");
       } else {
-        // Add new record
-        setData([...data, newRecord]);
+        await create(newRecord);
         messageApi.success("Процесс успешно создан");
       }
 
@@ -255,8 +144,8 @@ export function ProductionProcessesPage() {
     });
   };
 
-  const handleDelete = (id: string) => {
-    setData(data.filter((item) => item.id !== id));
+  const handleDelete = async (id: string) => {
+    await remove(id).unwrap();
     messageApi.success("Процесс успешно удален");
   };
 
@@ -418,7 +307,7 @@ export function ProductionProcessesPage() {
           />
           <Popconfirm
             title="Вы уверены, что хотите удалить этот процесс?"
-            onConfirm={() => handleDelete(record.id)}
+            onConfirm={() => handleDelete(record._id!)}
             okText="Да"
             cancelText="Нет"
           >
@@ -438,8 +327,6 @@ export function ProductionProcessesPage() {
           <Input
             placeholder="Поиск по ID или LOT номеру"
             prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
             className="w-64"
           />
           <Button
@@ -454,8 +341,9 @@ export function ProductionProcessesPage() {
 
       <Table
         columns={columns}
-        dataSource={filteredData}
-        rowKey="id"
+        dataSource={data || []}
+        loading={isFetching}
+        rowKey="_id"
         scroll={{ x: "max-content" }}
         bordered
         size="middle"
@@ -483,7 +371,12 @@ export function ProductionProcessesPage() {
                 <Button key="back" onClick={handleCancel}>
                   Отмена
                 </Button>,
-                <Button key="submit" type="primary" onClick={handleSubmit}>
+                <Button
+                  loading={updateLoading || createLoading}
+                  key="submit"
+                  type="primary"
+                  onClick={handleSubmit}
+                >
                   {currentRecord ? "Обновить" : "Создать"}
                 </Button>,
               ]
@@ -497,38 +390,46 @@ export function ProductionProcessesPage() {
           className="grid grid-cols-1 md:grid-cols-3 gap-4"
         >
           <Form.Item
-            name="orderId"
-            label="ID номер заказа"
-            rules={[
-              {
-                required: true,
-                message: "Пожалуйста, введите ID номер заказа",
-              },
-            ]}
-            className="col-span-1"
+            name="lotNumber"
+            label="LOT number"
+            className="col-span-3"
+            rules={[{ required: true }]}
           >
-            <Input placeholder="Например: ORD-001" />
-          </Form.Item>
-
-          <Form.Item name="lotNumber" label="LOT number" className="col-span-1">
             <Input placeholder="Например: L0512323" />
           </Form.Item>
 
-          <Form.Item name="notes" label="Примечание" className="col-span-1">
-            <Input.TextArea rows={1} placeholder="Дополнительная информация" />
+          <Form.Item
+            name="notes"
+            label="Примечание"
+            className="col-span-3"
+            rules={[{ required: true }]}
+          >
+            <Input.TextArea rows={3} placeholder="Дополнительная информация" />
           </Form.Item>
 
           {/* Main Component - Raw Material 1 */}
           <div className="col-span-3">
             <h3 className="font-bold mb-2">Основное сырье 1</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Form.Item name="rawMaterial1BatchNumber" label="Номер партии">
+              <Form.Item
+                name="rawMaterial1BatchNumber"
+                label="Номер партии"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: L-1" />
               </Form.Item>
-              <Form.Item name="rawMaterial1Quantity" label="Кол-во (тн)">
+              <Form.Item
+                name="rawMaterial1Quantity"
+                label="Кол-во (тн)"
+                rules={[{ required: true }]}
+              >
                 <InputNumber min={0} placeholder="15" className="w-full" />
               </Form.Item>
-              <Form.Item name="rawMaterial1Position" label="Позиция">
+              <Form.Item
+                name="rawMaterial1Position"
+                label="Позиция"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: Склад-ОС-1" />
               </Form.Item>
             </div>
@@ -538,13 +439,25 @@ export function ProductionProcessesPage() {
           <div className="col-span-3">
             <h3 className="font-bold mb-2">Основное сырье 2</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Form.Item name="rawMaterial2BatchNumber" label="Номер партии">
+              <Form.Item
+                name="rawMaterial2BatchNumber"
+                label="Номер партии"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: L-2" />
               </Form.Item>
-              <Form.Item name="rawMaterial2Quantity" label="Кол-во (тн)">
+              <Form.Item
+                name="rawMaterial2Quantity"
+                label="Кол-во (тн)"
+                rules={[{ required: true }]}
+              >
                 <InputNumber min={0} placeholder="2" className="w-full" />
               </Form.Item>
-              <Form.Item name="rawMaterial2Position" label="Позиция">
+              <Form.Item
+                name="rawMaterial2Position"
+                label="Позиция"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: Склад-ОС-2" />
               </Form.Item>
             </div>
@@ -554,13 +467,25 @@ export function ProductionProcessesPage() {
           <div className="col-span-3">
             <h3 className="font-bold mb-2">Основное сырье 3</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Form.Item name="rawMaterial3BatchNumber" label="Номер партии">
+              <Form.Item
+                name="rawMaterial3BatchNumber"
+                label="Номер партии"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: L-3" />
               </Form.Item>
-              <Form.Item name="rawMaterial3Quantity" label="Кол-во (тн)">
+              <Form.Item
+                name="rawMaterial3Quantity"
+                label="Кол-во (тн)"
+                rules={[{ required: true }]}
+              >
                 <InputNumber min={0} placeholder="5" className="w-full" />
               </Form.Item>
-              <Form.Item name="rawMaterial3Position" label="Позиция">
+              <Form.Item
+                name="rawMaterial3Position"
+                label="Позиция"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: Склад-ОС-3" />
               </Form.Item>
             </div>
@@ -570,10 +495,18 @@ export function ProductionProcessesPage() {
           <div className="col-span-3">
             <h3 className="font-bold mb-2">Побочный продукт VTR-70</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Form.Item name="byProductBatchNumber" label="Номер партии">
+              <Form.Item
+                name="byProductBatchNumber"
+                label="Номер партии"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: L-PP-001" />
               </Form.Item>
-              <Form.Item name="byProductQuantity" label="Кол-во (тн)">
+              <Form.Item
+                name="byProductQuantity"
+                label="Кол-во (тн)"
+                rules={[{ required: true }]}
+              >
                 <InputNumber
                   min={0}
                   step={0.1}
@@ -581,7 +514,11 @@ export function ProductionProcessesPage() {
                   className="w-full"
                 />
               </Form.Item>
-              <Form.Item name="byProductPosition" label="Позиция">
+              <Form.Item
+                name="byProductPosition"
+                label="Позиция"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: Склад-ПП-1" />
               </Form.Item>
             </div>
@@ -591,10 +528,18 @@ export function ProductionProcessesPage() {
           <div className="col-span-3">
             <h3 className="font-bold mb-2">Присадка & Химикаты</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Form.Item name="additivesBatchNumber" label="Номер партии">
+              <Form.Item
+                name="additivesBatchNumber"
+                label="Номер партии"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: L-PP-001" />
               </Form.Item>
-              <Form.Item name="additivesQuantity" label="Кол-во (тн)">
+              <Form.Item
+                name="additivesQuantity"
+                label="Кол-во (тн)"
+                rules={[{ required: true }]}
+              >
                 <InputNumber
                   min={0}
                   step={0.1}
@@ -602,7 +547,11 @@ export function ProductionProcessesPage() {
                   className="w-full"
                 />
               </Form.Item>
-              <Form.Item name="additivesPosition" label="Позиция">
+              <Form.Item
+                name="additivesPosition"
+                label="Позиция"
+                rules={[{ required: true }]}
+              >
                 <Input placeholder="Например: Склад-ПР-1" />
               </Form.Item>
             </div>

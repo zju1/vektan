@@ -21,12 +21,18 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import {
+  useCreateTransferItemMutation,
+  useDeleteTransferItemMutation,
+  useGetTransferItemsQuery,
+  useUpdateTransferItemMutation,
+} from "@/app/store/services/sales.api";
 
 const { Title } = Typography;
 const { Option } = Select;
 
-interface TransferItem {
-  id: string;
+export interface TransferItem {
+  _id?: string;
   date: string; // Date of transfer
   requestId: string; // Request ID (connected to module)
   recipientDepartment: string; // Department recipient
@@ -43,64 +49,6 @@ interface TransferItem {
   recipientPosition: string; // Recipient position
   notes: string; // Notes
 }
-
-// Mock data based on the example in the image
-const mockData: TransferItem[] = [
-  {
-    id: "1",
-    date: "2025-04-14",
-    requestId: "WO-001",
-    recipientDepartment: "Лаборатория",
-    itemId: "MRIA-U2KSr-001",
-    itemName: "Низкомолекулярный воск",
-    category: "Основное сырье",
-    purpose: "Для производства/ для образца клиенту",
-    lotNumber: "L151515",
-    packageQuantity: 1,
-    totalQuantity: 20,
-    unit: "кг",
-    sender: "Рахманов У.",
-    recipient: "Иванов С.К.",
-    recipientPosition: "Младший специалист",
-    notes: "",
-  },
-  {
-    id: "2",
-    date: "2025-04-15",
-    requestId: "WO-002",
-    recipientDepartment: "Производство",
-    itemId: "CHEM-A23-005",
-    itemName: "Катализатор процесса",
-    category: "Вспомогательное сырье",
-    purpose: "Для производства",
-    lotNumber: "L789012",
-    packageQuantity: 2,
-    totalQuantity: 5,
-    unit: "л",
-    sender: "Сидоров А.В.",
-    recipient: "Петров И.Д.",
-    recipientPosition: "Оператор линии",
-    notes: "Срочный заказ",
-  },
-  {
-    id: "3",
-    date: "2025-04-16",
-    requestId: "WO-003",
-    recipientDepartment: "Технический отдел",
-    itemId: "TOOL-WR-023",
-    itemName: "Комплект инструментов",
-    category: "Запчасти",
-    purpose: "Для обслуживания",
-    lotNumber: "LT45678",
-    packageQuantity: 1,
-    totalQuantity: 1,
-    unit: "шт",
-    sender: "Кузнецов Н.П.",
-    recipient: "Смирнов В.В.",
-    recipientPosition: "Инженер",
-    notes: "Возврат через 5 дней",
-  },
-];
 
 // Department options for the form
 const departmentOptions = [
@@ -124,25 +72,17 @@ const categoryOptions = [
 const unitOptions = ["кг", "л", "шт", "м", "г", "мл"];
 
 export function TransferItems() {
-  const [items, setItems] = useState<TransferItem[]>(mockData);
-  const [searchText, setSearchText] = useState("");
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<TransferItem | null>(null);
   const [form] = Form.useForm();
-
-  // Filter items based on search text
-  const filteredItems = items.filter((item) => {
-    const searchLower = searchText.toLowerCase();
-    return (
-      item.requestId.toLowerCase().includes(searchLower) ||
-      item.itemName.toLowerCase().includes(searchLower) ||
-      item.recipientDepartment.toLowerCase().includes(searchLower) ||
-      item.recipient.toLowerCase().includes(searchLower) ||
-      item.lotNumber.toLowerCase().includes(searchLower)
-    );
-  });
+  const [create, { isLoading: createLoading }] =
+    useCreateTransferItemMutation();
+  const [update, { isLoading: updateLoading }] =
+    useUpdateTransferItemMutation();
+  const [remove] = useDeleteTransferItemMutation();
+  const { data, isFetching } = useGetTransferItemsQuery({});
 
   // Handle create item
   const handleCreate = () => {
@@ -152,9 +92,8 @@ export function TransferItems() {
 
   // Handle submit for create/edit form
   const handleFormSubmit = () => {
-    form.validateFields().then((values) => {
+    form.validateFields().then(async (values) => {
       const newItem: TransferItem = {
-        id: selectedItem ? selectedItem.id : `${items.length + 1}`,
         date: values.date.format("YYYY-MM-DD"),
         requestId: values.requestId,
         recipientDepartment: values.recipientDepartment,
@@ -174,14 +113,12 @@ export function TransferItems() {
 
       if (selectedItem) {
         // Edit mode
-        setItems(
-          items.map((item) => (item.id === selectedItem.id ? newItem : item))
-        );
+        await update({ ...newItem, _id: selectedItem._id }).unwrap();
         setIsEditModalVisible(false);
         message.success("Запись успешно обновлена");
       } else {
         // Create mode
-        setItems([...items, newItem]);
+        await create(newItem).unwrap();
         setIsCreateModalVisible(false);
         message.success("Запись успешно создана");
       }
@@ -225,8 +162,8 @@ export function TransferItems() {
       content: "Вы действительно хотите удалить эту запись?",
       okText: "Да",
       cancelText: "Отмена",
-      onOk: () => {
-        setItems(items.filter((item) => item.id !== record.id));
+      onOk: async () => {
+        await remove(record._id!).unwrap();
         message.success("Запись успешно удалена");
       },
     });
@@ -252,14 +189,6 @@ export function TransferItems() {
           rules={[{ required: true, message: "Введите дату перемещения" }]}
         >
           <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          name="requestId"
-          label="Номер заявки (связан с модулем заявок)"
-          rules={[{ required: true, message: "Введите номер заявки" }]}
-        >
-          <Input placeholder="Например: WO-001" />
         </Form.Item>
 
         <Form.Item
@@ -511,8 +440,6 @@ export function TransferItems() {
         <Input
           placeholder="Поиск по номеру заявки, товару, получателю..."
           prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
           style={{ width: "100%", marginRight: 16 }}
         />
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
@@ -522,8 +449,9 @@ export function TransferItems() {
 
       <Table
         columns={columns}
-        dataSource={filteredItems}
-        rowKey="id"
+        dataSource={(data as any) || []}
+        loading={isFetching}
+        rowKey="_id"
         scroll={{ x: "max-content" }}
         size="middle"
         pagination={{
@@ -540,6 +468,9 @@ export function TransferItems() {
         onOk={handleFormSubmit}
         onCancel={() => setIsCreateModalVisible(false)}
         width={800}
+        okButtonProps={{
+          loading: createLoading || updateLoading,
+        }}
         okText="Создать"
         cancelText="Отмена"
       >
@@ -551,6 +482,9 @@ export function TransferItems() {
         title="Редактировать запись о перемещении"
         open={isEditModalVisible}
         onOk={handleFormSubmit}
+        okButtonProps={{
+          loading: createLoading || updateLoading,
+        }}
         onCancel={() => setIsEditModalVisible(false)}
         width={800}
         okText="Сохранить"

@@ -22,6 +22,7 @@ import { settingsApi } from "./services/settings.api";
 import { warehouseApi } from "./services/warehouse.service";
 import { purchasesApi } from "./services/purchase.api";
 import { adminApi } from "./services/admin";
+import { salesApi } from "./services/sales.api";
 
 const persistConfig: PersistConfig<any> = {
   key: "root",
@@ -34,6 +35,7 @@ const persistConfig: PersistConfig<any> = {
     warehouseApi.reducerPath,
     purchasesApi.reducerPath,
     adminApi.reducerPath,
+    salesApi.reducerPath,
   ],
 };
 
@@ -55,6 +57,7 @@ export const store = configureStore({
       warehouseApi.middleware,
       purchasesApi.middleware,
       adminApi.middleware,
+      salesApi.middleware,
       authMiddleWare
     );
   },

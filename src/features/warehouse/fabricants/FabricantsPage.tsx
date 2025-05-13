@@ -21,13 +21,19 @@ import {
 } from "@ant-design/icons";
 import type { TableProps } from "antd";
 import dayjs from "dayjs";
+import {
+  useCreatePurchaseFabricantMutation,
+  useDeletePurchaseFabricantMutation,
+  useGetPurchaseFabricantsQuery,
+  useUpdatePurchaseFabricantMutation,
+} from "@/app/store/services/sales.api";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 // Define the interface for the material data
-interface MaterialData {
-  key: string;
+export interface MaterialData {
+  _id?: string;
   date: string;
   idNumber: string;
   name: string;
@@ -47,151 +53,21 @@ interface MaterialData {
   notes: string;
 }
 
-// Mock data based on the image
-const mockData: MaterialData[] = [
-  {
-    key: "1",
-    date: "14.04.2025",
-    idNumber: "MRM-UzKor-001",
-    name: "Низкомолекулярный воск",
-    category: "Основное сырье",
-    supplier: 'СП ООО "UzKorGas Chemical"',
-    wagonNumber: "23114531",
-    lotNumber: "424L02",
-    bagCount: 12,
-    totalTonnage: 50,
-    pricePerUnit: "900.00 USD",
-    totalAmount: "15,000.00 USD",
-    batch: 25,
-    penetrationQuality: 13,
-    viscosityQuality: 10.81,
-    meltingPointQuality: 115.52,
-    location: "Улица 1",
-    notes: "",
-  },
-  {
-    key: "2",
-    date: "14.04.2025",
-    idNumber: "MRM-UzKor-001",
-    name: "Низкомолекулярный воск",
-    category: "Основное сырье",
-    supplier: 'СП ООО "UzKorGas Chemical"',
-    wagonNumber: "23114531",
-    lotNumber: "424L04",
-    bagCount: 20,
-    totalTonnage: 50,
-    pricePerUnit: "800.00 USD",
-    totalAmount: "15,000.00 USD",
-    batch: 25,
-    penetrationQuality: 13.17,
-    viscosityQuality: 7.97,
-    meltingPointQuality: 114.76,
-    location: "Навес 1",
-    notes: "",
-  },
-  {
-    key: "3",
-    date: "14.04.2025",
-    idNumber: "MRM-UzKor-001",
-    name: "Низкомолекулярный воск",
-    category: "Основное сырье",
-    supplier: 'СП ООО "UzKorGas Chemical"',
-    wagonNumber: "23114531",
-    lotNumber: "424L20",
-    bagCount: 25,
-    totalTonnage: 50,
-    pricePerUnit: "700.00 USD",
-    totalAmount: "15,000.00 USD",
-    batch: 26,
-    penetrationQuality: 13,
-    viscosityQuality: 5.45,
-    meltingPointQuality: 109.16,
-    location: "Навес 2",
-    notes: "",
-  },
-  {
-    key: "4",
-    date: "14.04.2025",
-    idNumber: "MRM-UzKor-001",
-    name: "Низкомолекулярный воск",
-    category: "Основное сырье",
-    supplier: 'СП ООО "UzKorGas Chemical"',
-    wagonNumber: "23114531",
-    lotNumber: "424L22",
-    bagCount: 26,
-    totalTonnage: 50,
-    pricePerUnit: "850.00 USD",
-    totalAmount: "15,000.00 USD",
-    batch: 26,
-    penetrationQuality: 12.33,
-    viscosityQuality: 10.26,
-    meltingPointQuality: 116.2,
-    location: "Навес 3",
-    notes: "",
-  },
-  {
-    key: "5",
-    date: "14.04.2025",
-    idNumber: "MRM-UzKor-001",
-    name: "Низкомолекулярный воск",
-    category: "Основное сырье",
-    supplier: 'СП ООО "UzKorGas Chemical"',
-    wagonNumber: "23114531",
-    lotNumber: "424L24",
-    bagCount: 39,
-    totalTonnage: 50,
-    pricePerUnit: "750.00 USD",
-    totalAmount: "15,000.00 USD",
-    batch: 26,
-    penetrationQuality: 14.33,
-    viscosityQuality: 5.19,
-    meltingPointQuality: 107.06,
-    location: "Навес 4",
-    notes: "",
-  },
-  {
-    key: "6",
-    date: "14.04.2025",
-    idNumber: "MRM-UzKor-001",
-    name: "Низкомолекулярный воск",
-    category: "Основное сырье",
-    supplier: 'СП ООО "UzKorGas Chemical"',
-    wagonNumber: "23114531",
-    lotNumber: "424L02",
-    bagCount: 72,
-    totalTonnage: 50,
-    pricePerUnit: "825.15 USD",
-    totalAmount: "15,000.00 USD",
-    batch: 26,
-    penetrationQuality: 11.5,
-    viscosityQuality: 14.66,
-    meltingPointQuality: 116.61,
-    location: "Навес 5",
-    notes: "",
-  },
-];
-
 // Category options
 const categoryOptions = ["Основное сырье", "Вспомогательное сырье", "Упаковка"];
 
 export function Fabricants() {
-  const [data, setData] = useState<MaterialData[]>(mockData);
-  const [searchText, setSearchText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<MaterialData | null>(null);
   const [form] = Form.useForm();
-
-  // Filter data based on search text
-  const filteredData = data.filter((item) =>
-    Object.values(item).some(
-      (value) =>
-        value !== undefined &&
-        value !== null &&
-        value.toString().toLowerCase().includes(searchText.toLowerCase())
-    )
-  );
+  const [create, { isLoading: createLoading }] =
+    useCreatePurchaseFabricantMutation();
+  const [update, { isLoading: updateLoading }] =
+    useUpdatePurchaseFabricantMutation();
+  const [remove] = useDeletePurchaseFabricantMutation();
+  const { data, isFetching } = useGetPurchaseFabricantsQuery({});
 
   // Handler for showing the create modal
   const showCreateModal = () => {
@@ -216,29 +92,27 @@ export function Fabricants() {
   };
 
   // Handler for deleting a record
-  const handleDelete = (key: string) => {
+  const handleDelete = (id: string) => {
     Modal.confirm({
       title: "Вы уверены, что хотите удалить эту запись?",
       content: "Это действие невозможно отменить.",
       okText: "Да",
       okType: "danger",
       cancelText: "Нет",
-      onOk() {
-        setData(data.filter((item) => item.key !== key));
+      async onOk() {
+        await remove(id).unwrap();
       },
     });
   };
 
   // Handler for form submission (create new record)
   const handleCreate = () => {
-    form.validateFields().then((values) => {
+    form.validateFields().then(async (values) => {
       const newData: MaterialData = {
         ...values,
-        key: (data.length + 1).toString(),
         date: values.date ? values.date.format("DD.MM.YYYY") : "",
       };
-
-      setData([...data, newData]);
+      await create(newData).unwrap();
       setIsModalVisible(false);
       form.resetFields();
     });
@@ -248,19 +122,8 @@ export function Fabricants() {
   const handleEdit = () => {
     if (!currentRecord) return;
 
-    form.validateFields().then((values) => {
-      const updatedData = data.map((item) => {
-        if (item.key === currentRecord.key) {
-          return {
-            ...values,
-            key: item.key,
-            date: values.date ? values.date.format("DD.MM.YYYY") : "",
-          };
-        }
-        return item;
-      });
-
-      setData(updatedData);
+    form.validateFields().then(async (values) => {
+      await update({ ...values, _id: currentRecord._id! }).unwrap();
       setIsEditModalVisible(false);
     });
   };
@@ -393,7 +256,7 @@ export function Fabricants() {
             danger
             size="small"
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.key)}
+            onClick={() => handleDelete(record._id!)}
           />
         </Space>
       ),
@@ -414,16 +277,6 @@ export function Fabricants() {
           rules={[{ required: true, message: "Пожалуйста, выберите дату!" }]}
         >
           <DatePicker format="DD.MM.YYYY" style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          name="idNumber"
-          label="ID номер сырья"
-          rules={[
-            { required: true, message: "Пожалуйста, введите ID номер сырья!" },
-          ]}
-        >
-          <Input placeholder="Например: MRM-UzKor-001" />
         </Form.Item>
 
         <Form.Item
@@ -661,8 +514,6 @@ export function Fabricants() {
         <Input
           placeholder="Поиск по всем полям..."
           prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
           style={{ width: "100%", marginRight: "16px" }}
         />
         <Button
@@ -677,7 +528,8 @@ export function Fabricants() {
       {/* Main table */}
       <Table
         columns={columns}
-        dataSource={filteredData}
+        dataSource={data || []}
+        loading={isFetching}
         scroll={{ x: "max-content", y: "calc(100vh - 250px)" }}
         size="small"
         pagination={{ pageSize: 10 }}
@@ -690,6 +542,7 @@ export function Fabricants() {
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         onOk={handleCreate}
+        okButtonProps={{ loading: createLoading || updateLoading }}
         width={900}
         destroyOnClose
       >
@@ -736,6 +589,7 @@ export function Fabricants() {
         }
         open={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
+        okButtonProps={{ loading: createLoading || updateLoading }}
         onOk={handleEdit}
         width={900}
         destroyOnClose

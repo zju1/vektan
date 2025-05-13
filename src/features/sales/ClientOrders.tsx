@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -22,137 +20,75 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import type { TableColumnsType } from "antd";
+import {
+  useCreateClientOrderMutation,
+  useDeleteClientOrderMutation,
+  useGetClientOrdersQuery,
+  useUpdateClientOrderMutation,
+} from "@/app/store/services/sales.api";
 
-// Define the interface for order data
-interface OrderData {
-  id: number;
-  buyer: "ILCA-FZCO" | "Vektan Chemical";
-  hasILCA: boolean;
-  ilcaPrice: number | null;
-  ilcaTotalPrice: number | null;
-  recipient: string;
-  purchaseOrder: string;
-  quantity: number;
-  unit: string;
+export interface IClientOrder {
+  _id: string;
+  bagType: string;
+  buyer: string;
   country: string;
   deliveryTerms: string;
-  productType: string;
-  bagType: string;
-  shippedVolume: number;
-  pricePerTon: number;
-  totalPrice: number;
+  hasILCA: boolean;
+  ilcaPrice: number;
+  ilcaTotalPrice: number;
   paymentTerms: string;
+  pricePerTon: number;
+  productType: string;
+  purchaseOrder: string;
+  quantity: number;
+  recipient: string;
+  shippedVolume: number;
+  totalPrice: number;
+  unit: string;
 }
 
-// Mock data
-const initialData: OrderData[] = [
-  {
-    id: 1001,
-    buyer: "ILCA-FZCO",
-    hasILCA: true,
-    ilcaPrice: 1200,
-    ilcaTotalPrice: 12000,
-    recipient: "ABC Company",
-    purchaseOrder: "PO-2023-001",
-    quantity: 10,
-    unit: "тонна",
-    country: "Казахстан",
-    deliveryTerms: "CIF Алматы",
-    productType: "Тип A",
-    bagType: "Большой (1000 кг)",
-    shippedVolume: 10,
-    pricePerTon: 1500,
-    totalPrice: 15000,
-    paymentTerms: "100% предоплата",
-  },
-  {
-    id: 1002,
-    buyer: "Vektan Chemical",
-    hasILCA: false,
-    ilcaPrice: null,
-    ilcaTotalPrice: null,
-    recipient: "XYZ Ltd",
-    purchaseOrder: "PO-2023-002",
-    quantity: 5,
-    unit: "тонна",
-    country: "Узбекистан",
-    deliveryTerms: "FOB Ташкент",
-    productType: "Тип B",
-    bagType: "Маленький (25 кг)",
-    shippedVolume: 5,
-    pricePerTon: 1800,
-    totalPrice: 9000,
-    paymentTerms: "50% предоплата, 50% после доставки",
-  },
-  {
-    id: 1003,
-    buyer: "ILCA-FZCO",
-    hasILCA: true,
-    ilcaPrice: 1300,
-    ilcaTotalPrice: 26000,
-    recipient: "Global Trade",
-    purchaseOrder: "PO-2023-003",
-    quantity: 20,
-    unit: "тонна",
-    country: "Россия",
-    deliveryTerms: "DAP Москва",
-    productType: "Тип C",
-    bagType: "Большой (500 кг)",
-    shippedVolume: 20,
-    pricePerTon: 1600,
-    totalPrice: 32000,
-    paymentTerms: "30% предоплата, 70% через 30 дней",
-  },
-];
-
 export function ClientOrdersPage() {
-  const [data, setData] = useState<OrderData[]>(initialData);
   const [searchText, setSearchText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
-  const [currentRecord, setCurrentRecord] = useState<OrderData | null>(null);
+  const [currentRecord, setCurrentRecord] = useState<IClientOrder | null>(null);
   const [form] = Form.useForm();
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const { data } = useGetClientOrdersQuery({});
+  const [create, { isLoading: createLoading }] = useCreateClientOrderMutation();
+  const [update, { isLoading: updateLoading }] = useUpdateClientOrderMutation();
+  const [remove] = useDeleteClientOrderMutation();
 
-  // Filter data based on search text
-  const filteredData = data.filter((item) =>
-    Object.values(item).some(
-      (val) =>
-        val !== null &&
-        val.toString().toLowerCase().includes(searchText.toLowerCase())
-    )
-  );
+  const loading = createLoading || updateLoading;
 
   // Handle form submission
   const handleFormSubmit = () => {
-    form.validateFields().then((values) => {
+    console.log(modalMode);
+    form.validateFields().then(async (values) => {
       // Calculate total prices
       const ilcaTotalPrice =
         values.hasILCA && values.ilcaPrice
           ? values.ilcaPrice * values.quantity
-          : null;
+          : 0;
       const totalPrice = values.pricePerTon * values.quantity;
 
       const newRecord = {
         ...values,
         ilcaTotalPrice,
         totalPrice,
-        unit: "тонна", // Default unit
       };
+      console.log(newRecord);
 
-      if (modalMode === "create") {
-        // Generate a new ID for new records
-        newRecord.id = Math.max(...data.map((item) => item.id)) + 1;
-        setData([...data, newRecord]);
-        message.success("Заказ успешно создан");
-      } else {
-        // Update existing record
-        setData(
-          data.map((item) =>
-            item.id === currentRecord?.id ? { ...newRecord, id: item.id } : item
-          )
-        );
-        message.success("Заказ успешно обновлен");
+      try {
+        if (modalMode === "create") {
+          await create(newRecord).unwrap();
+          message.success("Заказ успешно создан");
+        } else {
+          await update({ ...newRecord, _id: currentRecord?._id }).unwrap();
+          message.success("Заказ успешно обновлен");
+        }
+      } catch (error) {
+        console.log(error);
       }
 
       form.resetFields();
@@ -160,10 +96,13 @@ export function ClientOrdersPage() {
     });
   };
 
-  // Handle record deletion
-  const handleDelete = (id: number) => {
-    setData(data.filter((item) => item.id !== id));
-    message.success("Заказ успешно удален");
+  const handleDelete = async (id: string) => {
+    try {
+      await remove(id).unwrap();
+      message.success("Заказ успешно удален");
+    } catch (error: any) {
+      console.log(error);
+    }
   };
 
   // Open modal for creating a new record
@@ -175,7 +114,7 @@ export function ClientOrdersPage() {
   };
 
   // Open modal for editing an existing record
-  const showEditModal = (record: OrderData) => {
+  const showEditModal = (record: IClientOrder) => {
     setCurrentRecord(record);
     setModalMode("edit");
     form.setFieldsValue(record);
@@ -183,7 +122,7 @@ export function ClientOrdersPage() {
   };
 
   // Open modal for viewing record details
-  const showViewModal = (record: OrderData) => {
+  const showViewModal = (record: IClientOrder) => {
     setCurrentRecord(record);
     setIsViewModalVisible(true);
   };
@@ -203,20 +142,16 @@ export function ClientOrdersPage() {
     }
 
     form.setFieldValue("totalPrice", pricePerTon * quantity);
-  }, [
-    form.getFieldValue("hasILCA"),
-    form.getFieldValue("quantity"),
-    form.getFieldValue("ilcaPrice"),
-    form.getFieldValue("pricePerTon"),
-  ]);
+  }, [form]);
 
   // Table columns definition
-  const columns: TableColumnsType<OrderData> = [
+  const columns: TableColumnsType<IClientOrder> = [
     {
-      title: "ID",
-      dataIndex: "id",
-      key: "id",
+      title: "№",
+      dataIndex: "_id",
+      key: "_id",
       width: 80,
+      render: (_value, _record, index) => index + 1,
     },
     {
       title: "Покупатель",
@@ -340,7 +275,7 @@ export function ClientOrdersPage() {
           />
           <Popconfirm
             title="Вы уверены, что хотите удалить этот заказ?"
-            onConfirm={() => handleDelete(record.id)}
+            onConfirm={() => handleDelete(record._id)}
             okText="Да"
             cancelText="Нет"
           >
@@ -375,7 +310,7 @@ export function ClientOrdersPage() {
 
       <Table
         columns={columns}
-        dataSource={filteredData}
+        dataSource={data || []}
         rowKey="id"
         scroll={{ x: "max-content" }}
         pagination={{ pageSize: 10 }}
@@ -393,7 +328,12 @@ export function ClientOrdersPage() {
           <Button key="cancel" onClick={() => setIsModalVisible(false)}>
             Отмена
           </Button>,
-          <Button key="submit" type="primary" onClick={handleFormSubmit}>
+          <Button
+            key="submit"
+            loading={loading}
+            type="primary"
+            onClick={handleFormSubmit}
+          >
             {modalMode === "create" ? "Создать" : "Сохранить"}
           </Button>,
         ]}
@@ -573,7 +513,7 @@ export function ClientOrdersPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 border-b pb-2">
               <div className="font-bold">ID номер заказа</div>
-              <div>{currentRecord.id}</div>
+              <div>{currentRecord._id}</div>
             </div>
 
             <div className="border-b pb-2">

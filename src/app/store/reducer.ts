@@ -8,6 +8,7 @@ import { warehouseApi } from "./services/warehouse.service";
 import { purchasesApi } from "./services/purchase.api";
 import { adminApi } from "./services/admin";
 import uiSlice from "./slices/ui.slice";
+import { salesApi } from "./services/sales.api";
 
 export const reducer = combineReducers({
   [authApi.reducerPath]: authApi.reducer,
@@ -17,6 +18,7 @@ export const reducer = combineReducers({
   [warehouseApi.reducerPath]: warehouseApi.reducer,
   [purchasesApi.reducerPath]: purchasesApi.reducer,
   [adminApi.reducerPath]: adminApi.reducer,
+  [salesApi.reducerPath]: salesApi.reducer,
   auth: authSlice,
   ui: uiSlice,
 });

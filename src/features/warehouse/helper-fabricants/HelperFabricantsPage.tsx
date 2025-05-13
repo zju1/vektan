@@ -22,13 +22,19 @@ import {
 } from "@ant-design/icons";
 import type { TableProps } from "antd";
 import dayjs from "dayjs";
+import {
+  useCreateHelpingMaterialMutation,
+  useDeleteHelpingMaterialMutation,
+  useGetHelpingMaterialsQuery,
+  useUpdateHelpingMaterialMutation,
+} from "@/app/store/services/sales.api";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 // Define the interface for the raw material data
-interface RawMaterialData {
-  key: string;
+export interface RawMaterialData {
+  _id?: string;
   date: string;
   idNumber: string;
   name: string;
@@ -46,67 +52,6 @@ interface RawMaterialData {
   location: string;
   notes: string;
 }
-
-// Mock data based on the image
-const mockData: RawMaterialData[] = [
-  {
-    key: "1",
-    date: "14.04.2025",
-    idNumber: "SRM-GM-001",
-    name: "Химикаты",
-    supplier: 'ООО "Chemical Production"',
-    category: "Вспомогательное сырье",
-    wagonNumber: "23114531",
-    documentNumber: "15615131",
-    packagingType: "канистра",
-    quantity: 153,
-    unit: "литров",
-    pricePerUnit: "900.00 USD",
-    totalAmount: "15 000.00 USD",
-    batch: 25,
-    qualityControl: "Проверено",
-    location: "Навес 5",
-    notes: "",
-  },
-  {
-    key: "2",
-    date: "15.04.2025",
-    idNumber: "SRM-GM-002",
-    name: "Растворители",
-    supplier: 'ООО "Chemical Production"',
-    category: "Вспомогательное сырье",
-    wagonNumber: "23114532",
-    documentNumber: "15615132",
-    packagingType: "бочка",
-    quantity: 50,
-    unit: "литров",
-    pricePerUnit: "850.00 USD",
-    totalAmount: "42 500.00 USD",
-    batch: 26,
-    qualityControl: "В процессе",
-    location: "Навес 3",
-    notes: "Срочная поставка",
-  },
-  {
-    key: "3",
-    date: "16.04.2025",
-    idNumber: "SRM-GM-003",
-    name: "Катализаторы",
-    supplier: 'ООО "Chemical Production"',
-    category: "Основное сырье",
-    wagonNumber: "23114533",
-    documentNumber: "15615133",
-    packagingType: "мешок",
-    quantity: 200,
-    unit: "кг",
-    pricePerUnit: "1200.00 USD",
-    totalAmount: "240 000.00 USD",
-    batch: 27,
-    qualityControl: "Проверено",
-    location: "Навес 2",
-    notes: "",
-  },
-];
 
 // Category options
 const categoryOptions = ["Основное сырье", "Вспомогательное сырье", "Упаковка"];
@@ -132,8 +77,6 @@ const qualityControlOptions = [
 ];
 
 export function HelperFabricantsPage() {
-  const [data, setData] = useState<RawMaterialData[]>(mockData);
-  const [searchText, setSearchText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -141,16 +84,12 @@ export function HelperFabricantsPage() {
     null
   );
   const [form] = Form.useForm();
-
-  // Filter data based on search text
-  const filteredData = data.filter((item) =>
-    Object.values(item).some(
-      (value) =>
-        value !== undefined &&
-        value !== null &&
-        value.toString().toLowerCase().includes(searchText.toLowerCase())
-    )
-  );
+  const [create, { isLoading: createLoading }] =
+    useCreateHelpingMaterialMutation();
+  const [update, { isLoading: updateLoading }] =
+    useUpdateHelpingMaterialMutation();
+  const [remove] = useDeleteHelpingMaterialMutation();
+  const { data, isFetching } = useGetHelpingMaterialsQuery({});
 
   // Handler for showing the create modal
   const showCreateModal = () => {
@@ -175,29 +114,23 @@ export function HelperFabricantsPage() {
   };
 
   // Handler for deleting a record
-  const handleDelete = (key: string) => {
+  const handleDelete = (id: string) => {
     Modal.confirm({
       title: "Вы уверены, что хотите удалить эту запись?",
       content: "Это действие невозможно отменить.",
       okText: "Да",
       okType: "danger",
       cancelText: "Нет",
-      onOk() {
-        setData(data.filter((item) => item.key !== key));
+      async onOk() {
+        await remove(id).unwrap();
       },
     });
   };
 
   // Handler for form submission (create new record)
   const handleCreate = () => {
-    form.validateFields().then((values) => {
-      const newData: RawMaterialData = {
-        ...values,
-        key: (data.length + 1).toString(),
-        date: values.date ? values.date.format("DD.MM.YYYY") : "",
-      };
-
-      setData([...data, newData]);
+    form.validateFields().then(async (values) => {
+      await create(values).unwrap();
       setIsModalVisible(false);
       form.resetFields();
     });
@@ -207,19 +140,8 @@ export function HelperFabricantsPage() {
   const handleEdit = () => {
     if (!currentRecord) return;
 
-    form.validateFields().then((values) => {
-      const updatedData = data.map((item) => {
-        if (item.key === currentRecord.key) {
-          return {
-            ...values,
-            key: item.key,
-            date: values.date ? values.date.format("DD.MM.YYYY") : "",
-          };
-        }
-        return item;
-      });
-
-      setData(updatedData);
+    form.validateFields().then(async (values) => {
+      await update({ ...values, _id: currentRecord._id }).unwrap();
       setIsEditModalVisible(false);
     });
   };
@@ -353,7 +275,7 @@ export function HelperFabricantsPage() {
             danger
             size="small"
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.key)}
+            onClick={() => handleDelete(record._id!)}
           />
         </Space>
       ),
@@ -374,16 +296,6 @@ export function HelperFabricantsPage() {
           rules={[{ required: true, message: "Пожалуйста, выберите дату!" }]}
         >
           <DatePicker format="DD.MM.YYYY" style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          name="idNumber"
-          label="ID номер сырья"
-          rules={[
-            { required: true, message: "Пожалуйста, введите ID номер сырья!" },
-          ]}
-        >
-          <Input placeholder="Например: SRM-GM-001" />
         </Form.Item>
 
         <Form.Item
@@ -513,6 +425,7 @@ export function HelperFabricantsPage() {
         <Form.Item
           name="qualityControl"
           label="Качество контроля"
+          className="col-span-2"
           rules={[
             { required: true, message: "Выберите статус контроля качества!" },
           ]}
@@ -618,8 +531,6 @@ export function HelperFabricantsPage() {
         <Input
           placeholder="Поиск по всем полям..."
           prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
           style={{ width: "100%", marginRight: "16px" }}
         />
         <Button
@@ -634,7 +545,8 @@ export function HelperFabricantsPage() {
       {/* Main table */}
       <Table
         columns={columns}
-        dataSource={filteredData}
+        dataSource={data || []}
+        loading={isFetching}
         scroll={{ x: "max-content", y: "calc(100vh - 250px)" }}
         size="small"
         pagination={{ pageSize: 10 }}
@@ -648,6 +560,7 @@ export function HelperFabricantsPage() {
         onCancel={() => setIsModalVisible(false)}
         onOk={handleCreate}
         width={900}
+        okButtonProps={{ loading: createLoading || updateLoading }}
         destroyOnClose
       >
         {renderForm()}
@@ -695,6 +608,7 @@ export function HelperFabricantsPage() {
         onCancel={() => setIsEditModalVisible(false)}
         onOk={handleEdit}
         width={900}
+        okButtonProps={{ loading: createLoading || updateLoading }}
         destroyOnClose
       >
         {renderForm()}

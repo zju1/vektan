@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Table,
   Button,
@@ -22,13 +22,19 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
+import {
+  useCreateStockAnalyzeMutation,
+  useDeleteStockAnalyzeMutation,
+  useGetStockAnalyzesQuery,
+  useUpdateStockAnalyzeMutation,
+} from "@/app/store/services/sales.api";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 // Define the interface for stock item data structure
-interface StockItem {
-  id: string;
+export interface StockItem {
+  _id: string;
   serialNumber: string;
   arrivalDate: string;
   productName: string;
@@ -42,53 +48,6 @@ interface StockItem {
   notes: string;
 }
 
-// Mock data for initial rendering
-const initialData: StockItem[] = [
-  {
-    id: "1",
-    serialNumber: "SN001",
-    arrivalDate: "2025-05-01",
-    productName: "Болт M10x50",
-    category: "Крепежные изделия",
-    quantity: 1000,
-    unit: "шт.",
-    packagingType: "Коробка",
-    remainingStock: 750,
-    minQuantity: 200,
-    deliveryTime: "3 дня",
-    notes: 'Основной поставщик: ООО "МеталлСнаб"',
-  },
-  {
-    id: "2",
-    serialNumber: "SN002",
-    arrivalDate: "2025-05-03",
-    productName: "Гайка M10",
-    category: "Крепежные изделия",
-    quantity: 1500,
-    unit: "шт.",
-    packagingType: "Мешок",
-    remainingStock: 1200,
-    minQuantity: 300,
-    deliveryTime: "2 дня",
-    notes: "",
-  },
-  {
-    id: "3",
-    serialNumber: "SN003",
-    arrivalDate: "2025-04-28",
-    productName: "Труба стальная 50мм",
-    category: "Металлопрокат",
-    quantity: 50,
-    unit: "м.",
-    packagingType: "Связка",
-    remainingStock: 12,
-    minQuantity: 15,
-    deliveryTime: "7 дней",
-    notes: "Срочный заказ необходим",
-  },
-];
-
-// Define the units options
 const unitOptions = ["шт.", "кг.", "г.", "м.", "см.", "мм.", "т.н.", "литр"];
 
 // Define the packaging types
@@ -104,29 +63,19 @@ const packagingTypes = [
 // Component for Stock Analysis Page
 export function StockAnalyzePage() {
   // State variables
-  const [dataSource, setDataSource] = useState<StockItem[]>(initialData);
-  const [searchText, setSearchText] = useState<string>("");
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isViewModalVisible, setIsViewModalVisible] = useState<boolean>(false);
   const [currentItem, setCurrentItem] = useState<StockItem | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [form] = Form.useForm();
+  const { data, isFetching } = useGetStockAnalyzesQuery({});
+  const [create, { isLoading: createLoading }] =
+    useCreateStockAnalyzeMutation();
+  const [update, { isLoading: updateLoading }] =
+    useUpdateStockAnalyzeMutation();
+  const [remove] = useDeleteStockAnalyzeMutation();
 
-  // Filter data based on search text
-  const filteredData = dataSource.filter((item) => {
-    const searchLower = searchText.toLowerCase();
-    return (
-      item.serialNumber.toLowerCase().includes(searchLower) ||
-      item.productName.toLowerCase().includes(searchLower) ||
-      item.category.toLowerCase().includes(searchLower) ||
-      item.notes.toLowerCase().includes(searchLower)
-    );
-  });
-
-  // Handle search input change
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
-  };
+  const loading = createLoading || updateLoading;
 
   // Handler for showing create modal
   const showCreateModal = () => {
@@ -157,7 +106,7 @@ export function StockAnalyzePage() {
   const handleModalOk = () => {
     form
       .validateFields()
-      .then((values) => {
+      .then(async (values) => {
         const formattedValues = {
           ...values,
           arrivalDate: values.arrivalDate
@@ -166,19 +115,10 @@ export function StockAnalyzePage() {
         };
 
         if (modalMode === "create") {
-          // Add new item with unique ID
-          const newItem: StockItem = {
-            id: Date.now().toString(),
-            ...formattedValues,
-          };
-          setDataSource([...dataSource, newItem]);
+          await create(formattedValues).unwrap();
           message.success("Запись успешно добавлена");
         } else if (modalMode === "edit" && currentItem) {
-          // Update existing item
-          const newData = dataSource.map((item) =>
-            item.id === currentItem.id ? { ...item, ...formattedValues } : item
-          );
-          setDataSource(newData);
+          await update({ ...formattedValues, _id: currentItem._id }).unwrap();
           message.success("Запись успешно обновлена");
         }
 
@@ -210,9 +150,8 @@ export function StockAnalyzePage() {
       okText: "Да",
       okType: "danger",
       cancelText: "Отмена",
-      onOk() {
-        const newData = dataSource.filter((item) => item.id !== id);
-        setDataSource(newData);
+      async onOk() {
+        await remove(id).unwrap();
         message.success("Запись успешно удалена");
       },
     });
@@ -312,7 +251,7 @@ export function StockAnalyzePage() {
               type="text"
               danger
               icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record.id)}
+              onClick={() => handleDelete(record._id)}
             />
           </Tooltip>
         </Space>
@@ -328,8 +267,6 @@ export function StockAnalyzePage() {
           <Input
             placeholder="Поиск по товарам, категориям, номерам..."
             prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={handleSearch}
             className="max-w-md"
             size="large"
           />
@@ -346,8 +283,9 @@ export function StockAnalyzePage() {
 
       <Table
         columns={columns}
-        dataSource={filteredData}
-        rowKey="id"
+        dataSource={data || []}
+        loading={isFetching}
+        rowKey="_id"
         scroll={{ x: 1800 }}
         pagination={{
           pageSize: 10,
@@ -365,6 +303,7 @@ export function StockAnalyzePage() {
         }
         open={isModalVisible}
         onOk={handleModalOk}
+        okButtonProps={{ loading }}
         onCancel={handleModalCancel}
         width={800}
         okText={modalMode === "create" ? "Добавить" : "Сохранить"}
@@ -380,16 +319,6 @@ export function StockAnalyzePage() {
           }}
         >
           <div className="grid grid-cols-2 gap-4">
-            <Form.Item
-              name="serialNumber"
-              label="ID номер"
-              rules={[
-                { required: true, message: "Пожалуйста, введите ID номер!" },
-              ]}
-            >
-              <Input placeholder="Введите ID номер товара" />
-            </Form.Item>
-
             <Form.Item
               name="arrivalDate"
               label="Дата поступления в склад"
