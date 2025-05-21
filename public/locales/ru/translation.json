@@ -163,5 +163,21 @@
   "acceptanceOfProducts": "Приемка товаров",
   "newAcceptance": "Новая приемка",
   "acceptNewProducts": "Принять новые товары",
-  "purchaseItems": "Закупки товаров"
+  "purchaseItems": "Закупки товаров",
+  "employees": "Сотрудники",
+  "create": "Создать",
+  "newEmployee": "Новый сотрудник",
+  "editEmployee": "Редактировать сотрудника",
+  "basic": "Обычный",
+  "shift": "Смена",
+  "position": "Должность",
+  "subDivision": "Подразделение",
+  "subOrdination": "Подчинение",
+  "jobType": "Тип работы",
+  "brigadeNumber": "Номер бригады",
+  "comment": "Примечание",
+  "phoneNumber": "Номер телефона",
+  "add": "Добавить",
+  "childrenUnitTypes": "Типы дочерних единиц",
+  "editUnitType": "Изменить тип единицы"
 }

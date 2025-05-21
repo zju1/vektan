@@ -8,6 +8,7 @@ import {
   useGetUnitTypeByIdQuery,
   useUpdateUnitTypeMutation,
 } from "@/app/store/services/settings.api";
+import { CircleMinus, CirclePlus } from "lucide-react";
 
 export default function UnitTypeFormModal() {
   const { t } = useTranslation();
@@ -140,6 +141,60 @@ export default function UnitTypeFormModal() {
                   unCheckedChildren={t("inactive")}
                 />
               </Form.Item>
+              <h1>{t("childrenUnitTypes")}</h1>
+              <Form.List name="units" initialValue={[{ name: "", code: "" }]}>
+                {(fields, { add, remove }) => (
+                  <>
+                    <div className="grid gap-4">
+                      {fields.map(({ key, name, ...restField }) => (
+                        <div key={key} className="flex items-center gap-2">
+                          <Form.Item
+                            className="flex-1"
+                            {...restField}
+                            name={[name, "code"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: t("required"),
+                              },
+                            ]}
+                          >
+                            <Input placeholder={t("code")} />
+                          </Form.Item>
+                          <Form.Item
+                            className="flex-1"
+                            {...restField}
+                            name={[name, "name"]}
+                            rules={[
+                              {
+                                required: true,
+                                message: t("required"),
+                              },
+                            ]}
+                          >
+                            <Input placeholder={t("name")} />
+                          </Form.Item>
+                          <CircleMinus
+                            className="size-4 cursor-pointer"
+                            onClick={() => remove(name)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <Form.Item>
+                      <Button
+                        type="dashed"
+                        onClick={() => add()}
+                        block
+                        icon={<CirclePlus className="size-4" />}
+                      >
+                        {t("add")}
+                      </Button>
+                    </Form.Item>
+                  </>
+                )}
+              </Form.List>
 
               <div className="flex items-center justify-end mt-6">
                 <Button onClick={hideModal} className="mr-2">

@@ -6,6 +6,7 @@ export interface UnitTypeDTO {
   isActive: boolean; // Is this unit currently in use?
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
+  units: { name: string; code: string }[];
 }
 
 export const unitTypeStatusOptions = [

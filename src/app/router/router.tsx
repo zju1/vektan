@@ -1,4 +1,5 @@
 import { DepartmentPage } from "@/features/administrations/departments/DepartmentsPage";
+import { EmployeesPage } from "@/features/administrations/employees/EmployeesPage";
 import { FiancialAgentPage } from "@/features/ai-agents/agents/FiancialAgent";
 import { InventoryAgentPage } from "@/features/ai-agents/agents/InventoryAgent";
 import { LogisticsAgentPage } from "@/features/ai-agents/agents/LogisticsAgent";
@@ -142,6 +143,10 @@ export const router = createBrowserRouter([
       {
         path: "administration/departments",
         element: <DepartmentPage />,
+      },
+      {
+        path: "administration/users",
+        element: <EmployeesPage />,
       },
       {
         path: "*",
