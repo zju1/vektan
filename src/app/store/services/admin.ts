@@ -69,18 +69,18 @@ export const adminApi = createApi({
     /* ====================================================================== */
     getEmployees: builder.query<EmployeeDTO[], void>({
       query: () => ({
-        url: "administration/employees",
+        url: "auth/all",
       }),
       providesTags: ["EMPLOYEES"],
     }),
     getEmployeeById: builder.query<EmployeeDTO, string | null>({
       query: (id) => ({
-        url: `administration/employees/${id}`,
+        url: `auth/employee/${id}`,
       }),
     }),
     createEmployee: builder.mutation<unknown, EmployeeDTO>({
       query: (body) => ({
-        url: "administration/employees",
+        url: "auth/new",
         method: "POST",
         body,
       }),
@@ -91,7 +91,7 @@ export const adminApi = createApi({
       { item: EmployeeDTO; id: string }
     >({
       query: ({ item: body, id }) => ({
-        url: `administration/employees/${id}`,
+        url: `auth/employee/${id}`,
         method: "PUT",
         body,
       }),
@@ -99,7 +99,7 @@ export const adminApi = createApi({
     }),
     deleteEmployee: builder.mutation<unknown, string>({
       query: (id) => ({
-        url: `administration/employees/${id}`,
+        url: `auth/employee/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["EMPLOYEES"],

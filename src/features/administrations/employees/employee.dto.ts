@@ -1,16 +1,22 @@
 export interface EmployeeDTO {
   _id?: string;
-  fullName: string;
-  position: string;
-  departmentId: string;
-  subDivision: string;
-  subOrdination: string;
-  phoneNumbers: string[];
-  email: string;
-  jobType: "basic" | "shift";
-  brigadeNumber: number;
-  isActive: boolean;
-  comment: string;
+
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: "admin" | "manager";
+
+  position?: string;
+  departmentId?: string;
+  subDivision?: string;
+  subOrdination?: string;
+  phoneNumbers?: string[];
+  email?: string;
+  jobType?: "basic" | "shift";
+  brigadeNumber?: number;
+  status?: "active" | "inactive";
+  comment?: string;
 }
 
 export const employeetStatusOptions = [

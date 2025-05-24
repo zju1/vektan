@@ -16,6 +16,8 @@ import { LogisticsPage } from "@/features/logistics/LogisticsPage";
 import NotFoundPage from "@/features/NotFound";
 import { ProductionOrdersPage } from "@/features/production/orders/ProductionOrders";
 import { ProductionProcessesPage } from "@/features/production/processes/ProductionProcesses";
+import { ApprovedPurchases } from "@/features/purchases/purchase-orders/ApprovedPurchasesPage";
+import { PurchaseOrdersPage } from "@/features/purchases/purchase-orders/PurchaseOrdersPage";
 import { PurchasePage } from "@/features/purchases/PurchasesPage";
 import { ClientOrdersPage } from "@/features/sales/ClientOrders";
 import { CurrenciesPage } from "@/features/settings/currencies/CurrenciesPage";
@@ -43,6 +45,31 @@ export const router = createBrowserRouter([
           {
             path: "orders",
             element: <ProductionOrdersPage />,
+          },
+          {
+            path: "processes",
+            element: <ProductionProcessesPage />,
+          },
+        ],
+      },
+      {
+        path: "purchases",
+        children: [
+          {
+            path: "stock-analysis",
+            element: <StockAnalyzePage />,
+          },
+          {
+            path: "purchase-requests",
+            element: <PurchaseOrdersPage />,
+          },
+          {
+            path: "approved-purchases",
+            element: <ApprovedPurchases />,
+          },
+          {
+            path: "suppliers",
+            element: <SuppliersPage />,
           },
           {
             path: "processes",

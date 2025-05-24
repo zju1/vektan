@@ -118,12 +118,35 @@ export default function DepartmentFormModal() {
           >
             <div className="grid gap-4">
               <Form.Item
-                name="fullName"
-                label={t("fullName")}
+                name="firstName"
+                label={t("firstName")}
                 rules={[{ required: true, message: t("required") }]}
               >
                 <Input />
               </Form.Item>
+              <Form.Item
+                name="lastName"
+                label={t("lastName")}
+                rules={[{ required: true, message: t("required") }]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                name="username"
+                label={t("username")}
+                rules={[{ required: true, message: t("required") }]}
+              >
+                <Input />
+              </Form.Item>
+              {!id && (
+                <Form.Item
+                  name="password"
+                  label={t("password")}
+                  rules={[{ required: true, message: t("required") }]}
+                >
+                  <Input />
+                </Form.Item>
+              )}
 
               <Form.Item
                 name="position"

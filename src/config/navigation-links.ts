@@ -24,17 +24,18 @@ export const navigationData = {
       icon: ShoppingCart,
       items: [
         {
-          title: "purchaseItems",
-          url: "/purchases/orders",
+          title: "purchaseRequests",
+          url: "/purchases/purchase-requests",
+        },
+        {
+          title: "approvedPurchases",
+          url: "/purchases/approved-purchases",
         },
         {
           title: "suppliers",
           url: "/purchases/suppliers",
         },
-        {
-          title: "priceHistory",
-          url: "/purchases/price-history",
-        },
+
         {
           title: "stockAnalysis",
           url: "/purchases/stock-analysis",

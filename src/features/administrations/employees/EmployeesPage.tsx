@@ -11,11 +11,12 @@ import {
   useGetEmployeesQuery,
 } from "@/app/store/services/admin";
 import DepartmentFormModal from "./EmployeeForm";
+import { useAuth } from "@/hooks/useAuth";
 
 export function EmployeesPage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-
+  const { user } = useAuth();
   // API integration
   const { data: rows, isLoading, isError, refetch } = useGetEmployeesQuery();
   const [remove, { isLoading: isDeleting }] = useDeleteEmployeeMutation();
@@ -65,17 +66,16 @@ export function EmployeesPage() {
       dataIndex: "fullName",
       key: "fullName",
       minWidth: 200,
-      sorter: (a: EmployeeDTO, b: EmployeeDTO) =>
-        a.fullName.localeCompare(b.fullName),
+      render: (_value, record) => `${record.firstName} ${record.lastName}`,
     },
     {
       title: t("department"),
       dataIndex: "departmentId",
       key: "departmentId",
       width: 200,
-      render: (value) => value.name,
+      render: (value) => value?.name,
       sorter: (a: EmployeeDTO, b: EmployeeDTO) =>
-        a.position.localeCompare(b.position),
+        a.position!.localeCompare(b.position!),
     },
     {
       title: t("position"),
@@ -83,7 +83,7 @@ export function EmployeesPage() {
       key: "position",
       width: 200,
       sorter: (a: EmployeeDTO, b: EmployeeDTO) =>
-        a.position.localeCompare(b.position),
+        a.position!.localeCompare(b.position!),
     },
     {
       title: t("subDivision"),
@@ -91,13 +91,13 @@ export function EmployeesPage() {
       key: "subDivision",
       width: 200,
       sorter: (a: EmployeeDTO, b: EmployeeDTO) =>
-        a.subDivision.localeCompare(b.subDivision),
+        a.subDivision!.localeCompare(b.subDivision!),
     },
     {
       title: t("phoneNumber"),
       dataIndex: "phoneNumbers",
       key: "phoneNumbers",
-      render: (value) => (value as string[]).join(", "),
+      render: (value) => ((value || "") as string[]).join(", "),
       width: 200,
     },
     {
@@ -106,7 +106,7 @@ export function EmployeesPage() {
       key: "email",
       width: 200,
       sorter: (a: EmployeeDTO, b: EmployeeDTO) =>
-        a.email.localeCompare(b.email),
+        a.email!.localeCompare(b.email!),
     },
     {
       title: t("jobType"),
@@ -115,7 +115,7 @@ export function EmployeesPage() {
       width: 200,
       render: (value) => t(value),
       sorter: (a: EmployeeDTO, b: EmployeeDTO) =>
-        a.jobType.localeCompare(b.jobType),
+        a.jobType!.localeCompare(b.jobType!),
     },
     {
       title: t("brigadeNumber"),
@@ -151,6 +151,7 @@ export function EmployeesPage() {
       key: "actions",
       width: 80,
       align: "right",
+      fixed: "right",
       render: (_, record) => (
         <div className="flex items-center gap-2">
           <Button type="text" size="small" icon={<EyeOutlined />} />
@@ -160,14 +161,16 @@ export function EmployeesPage() {
             icon={<EditOutlined />}
             onClick={() => handleEdit(record._id!)}
           />
-          <Button
-            type="text"
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record._id!)}
-            loading={isDeleting}
-          />
+          {user?._id !== record._id && (
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => handleDelete(record._id!)}
+              loading={isDeleting}
+            />
+          )}
         </div>
       ),
     },

@@ -163,5 +163,8 @@
   "productionPlanning": "Ishlab chiqarishni rejalashtirish",
   "qualityControl": "Sifat nazorati",
   "mainRawMaterial": "Asosiy xom ashyo",
-  "helpingRawMaterial": "Yordamchi xom ashyo"
+  "helpingRawMaterial": "Yordamchi xom ashyo",
+  "productName": "Наименование товара",
+  "dealing": "На согласовании",
+  "confirmed": "Утвержден"
 }

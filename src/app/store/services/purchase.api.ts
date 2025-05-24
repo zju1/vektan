@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store.config";
 import { envVariables } from "@/config/env";
-import type { PurchaseDTO } from "@/features/purchases/purchase.dto";
+import type { PurchaseOrderDTO } from "@/features/purchases/purchase-orders/purchase-order.dto";
+import type { PurchaseConfirmationDTO } from "@/features/purchases/purchase-orders/PurchaseConfirmForm";
 
 export const purchasesApi = createApi({
   reducerPath: "purchasesApi",
@@ -17,20 +18,28 @@ export const purchasesApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["PURCHASES"],
+  tagTypes: ["PURCHASES", "PURCHASE_REQUESTS"],
   endpoints: (builder) => ({
-    getPurchases: builder.query<PurchaseDTO[], void>({
-      query: () => ({
-        url: "purchase",
+    /* =============================================== */
+    /* =============================================== */
+    /* =============================================== */
+    /* =============================================== */
+    /* =============================================== */
+    getPurchaseRequest: builder.query<
+      PurchaseOrderDTO[],
+      { confirmed?: boolean }
+    >({
+      query: ({ confirmed }) => ({
+        url: confirmed ? "purchase/confirmed" : "purchase",
       }),
       providesTags: ["PURCHASES"],
     }),
-    getPurchaseById: builder.query<PurchaseDTO, string | null>({
+    getPurchaseRequestById: builder.query<PurchaseOrderDTO, string | null>({
       query: (id) => ({
         url: `purchase/${id}`,
       }),
     }),
-    createPurchase: builder.mutation<unknown, PurchaseDTO>({
+    createPurchaseRequest: builder.mutation<unknown, PurchaseOrderDTO>({
       query: (body) => ({
         url: "purchase",
         method: "POST",
@@ -38,18 +47,29 @@ export const purchasesApi = createApi({
       }),
       invalidatesTags: ["PURCHASES"],
     }),
-    updatePurchase: builder.mutation<
+    updatePurchaseRequest: builder.mutation<
       unknown,
-      { purchase: PurchaseDTO; id: string }
+      { purchase: PurchaseOrderDTO; _id: string }
     >({
-      query: ({ purchase: body, id }) => ({
-        url: `purchase/${id}`,
+      query: ({ purchase: body, _id }) => ({
+        url: `purchase/${_id}`,
         method: "PUT",
         body,
       }),
       invalidatesTags: ["PURCHASES"],
     }),
-    deletePurchase: builder.mutation<unknown, string>({
+    confirmPurchaseRequest: builder.mutation<
+      unknown,
+      { purchase: PurchaseConfirmationDTO; _id: string }
+    >({
+      query: ({ purchase: body, _id }) => ({
+        url: `purchase/${_id}/confirm`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["PURCHASES"],
+    }),
+    deletePurchaseRequest: builder.mutation<unknown, string>({
       query: (id) => ({
         url: `purchase/${id}`,
         method: "DELETE",
@@ -60,9 +80,10 @@ export const purchasesApi = createApi({
 });
 
 export const {
-  useGetPurchasesQuery,
-  useGetPurchaseByIdQuery,
-  useCreatePurchaseMutation,
-  useUpdatePurchaseMutation,
-  useDeletePurchaseMutation,
+  useGetPurchaseRequestByIdQuery,
+  useGetPurchaseRequestQuery,
+  useCreatePurchaseRequestMutation,
+  useUpdatePurchaseRequestMutation,
+  useDeletePurchaseRequestMutation,
+  useConfirmPurchaseRequestMutation,
 } = purchasesApi;
