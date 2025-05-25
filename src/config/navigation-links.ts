@@ -51,6 +51,26 @@ export const navigationData = {
           url: "/sales/logistics",
         },
         {
+          title: "logisticsReport",
+          url: "/sales/logistics-reports",
+        },
+        {
+          title: "logisticsTracking",
+          url: "/sales/logistics-tracking",
+        },
+        {
+          title: "mutualSettlementVectanIlca",
+          url: "/sales/msvil",
+        },
+        {
+          title: "museVectanAndOther",
+          url: "/sales/msvo",
+        },
+        {
+          title: "mutualSettlementsIlcaOther",
+          url: "/sales/msio",
+        },
+        {
           title: "clientOrders",
           url: "/sales/client-orders",
         },

@@ -20,6 +20,11 @@ import { ApprovedPurchases } from "@/features/purchases/purchase-orders/Approved
 import { PurchaseOrdersPage } from "@/features/purchases/purchase-orders/PurchaseOrdersPage";
 import { PurchasePage } from "@/features/purchases/PurchasesPage";
 import { ClientOrdersPage } from "@/features/sales/ClientOrders";
+import { LogisticsReportsPage } from "@/features/sales/logistics-report/LogisticsReportPage";
+import { LogisticsTrackingPage } from "@/features/sales/logistics-tracking/LogisticsTrackingPage";
+import { MutualSettlementsIlcaOtherPage } from "@/features/sales/msio/MutualSettlementsIlcaOtherPage";
+import MutualSettlementVectanIlcaPage from "@/features/sales/msvil/MutualSettlementVectanIlcaPage";
+import MuseVectanAndOtherPage from "@/features/sales/msvo/MuseVectanAndOtherPage";
 import { CurrenciesPage } from "@/features/settings/currencies/CurrenciesPage";
 import { UnitTypesPage } from "@/features/settings/unit-types/UnitTypesPage";
 import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
@@ -99,6 +104,56 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: "/sales",
+        children: [
+          {
+            path: "clients",
+            element: <ClientPage />,
+          },
+          {
+            path: "client-orders",
+            element: <ClientOrdersPage />,
+          },
+          {
+            path: "logistics",
+            element: <LogisticsPage />,
+          },
+          {
+            path: "logistics-reports",
+            element: <LogisticsReportsPage />,
+          },
+          {
+            path: "logistics-tracking",
+            element: <LogisticsTrackingPage />,
+          },
+          {
+            path: "msvil",
+            element: <MutualSettlementVectanIlcaPage />,
+          },
+          {
+            path: "msvo",
+            element: <MuseVectanAndOtherPage />,
+          },
+          {
+            path: "msio",
+            element: <MutualSettlementsIlcaOtherPage />,
+          },
+        ],
+      },
+      {
+        path: "administration",
+        children: [
+          {
+            path: "departments",
+            element: <DepartmentPage />,
+          },
+          {
+            path: "users",
+            element: <EmployeesPage />,
+          },
+        ],
+      },
+      {
         path: "statistics",
         element: <AIStatisticsPage />,
       },
@@ -111,40 +166,33 @@ export const router = createBrowserRouter([
         element: <AISettingsPage />,
       },
       {
-        path: "agents/financial-agent",
-        element: <FiancialAgentPage />,
-      },
-      {
-        path: "agents/logistics-agent",
-        element: <LogisticsAgentPage />,
-      },
-      {
-        path: "agents/inventory-agent",
-        element: <InventoryAgentPage />,
-      },
-      {
-        path: "agents/sales-agent",
-        element: <SalesAgentPage />,
-      },
-      {
-        path: "agents/purchasing-agent",
-        element: <PurchaseAgentPage />,
-      },
-      {
-        path: "agents/production-agent",
-        element: <ProductionAgentPage />,
-      },
-      {
-        path: "sales/clients",
-        element: <ClientPage />,
-      },
-      {
-        path: "suppliers",
-        element: <SuppliersPage />,
-      },
-      {
-        path: "suppliers",
-        element: <SuppliersPage />,
+        path: "/agents",
+        children: [
+          {
+            path: "financial-agent",
+            element: <FiancialAgentPage />,
+          },
+          {
+            path: "logistics-agent",
+            element: <LogisticsAgentPage />,
+          },
+          {
+            path: "inventory-agent",
+            element: <InventoryAgentPage />,
+          },
+          {
+            path: "sales-agent",
+            element: <SalesAgentPage />,
+          },
+          {
+            path: "purchasing-agent",
+            element: <PurchaseAgentPage />,
+          },
+          {
+            path: "production-agent",
+            element: <ProductionAgentPage />,
+          },
+        ],
       },
       {
         path: "settings/unitTypes",
@@ -159,22 +207,6 @@ export const router = createBrowserRouter([
         element: <PurchasePage />,
       },
 
-      {
-        path: "sales/client-orders",
-        element: <ClientOrdersPage />,
-      },
-      {
-        path: "logistics",
-        element: <LogisticsPage />,
-      },
-      {
-        path: "administration/departments",
-        element: <DepartmentPage />,
-      },
-      {
-        path: "administration/users",
-        element: <EmployeesPage />,
-      },
       {
         path: "*",
         element: <NotFoundPage />,

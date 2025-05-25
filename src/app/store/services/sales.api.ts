@@ -9,6 +9,11 @@ import type { StockItem } from "@/features/warehouse/analyze/StockAnalyze";
 import type { MaterialData } from "@/features/warehouse/fabricants/FabricantsPage";
 import type { RawMaterialData } from "@/features/warehouse/helper-fabricants/HelperFabricantsPage";
 import type { TransferItem } from "antd/es/transfer";
+import type { LogisticsReportDTO } from "@/features/sales/logistics-report/logistics-report.dto";
+import type { LogisticsTrackingDTO } from "@/features/sales/logistics-tracking/logisticsTracking.dto";
+import type { MutualSettlementVectanIlcaDTO } from "@/features/sales/msvil/msvil.dto";
+import type { MuseVectanAndOtherDTO } from "@/features/sales/msvo/muse-vectan-and-other.dto";
+import type { MutualSettlementsILCAOtherDTO } from "@/features/sales/msio/mutual-settlements-ilca-other.dto";
 
 export const salesApi = createApi({
   reducerPath: "salesApi",
@@ -32,6 +37,11 @@ export const salesApi = createApi({
     "PURCHASE_FABRICANTS",
     "HELPING_MATERIALS",
     "TRANSFER_ITEMS",
+    "LOGISTICS_REPORT",
+    "LOGISTICS_TRACKINGS",
+    "MutualSettlementVectanIlca",
+    "MuseVectanAndOther",
+    "mutual-settlements-ilca-other",
   ],
   endpoints: (builder) => ({
     //#region CLIENT ORDERS
@@ -288,6 +298,264 @@ export const salesApi = createApi({
       invalidatesTags: ["TRANSFER_ITEMS"],
     }),
     //#endregion
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    //#region LOGISTICS REPORTS
+    getLogisticsReport: builder.query<LogisticsReportDTO[], void>({
+      query: () => "/logistics-report",
+      providesTags: ["LOGISTICS_REPORT"],
+    }),
+    getLogisticsReportById: builder.query<LogisticsReportDTO, string>({
+      query: (id) => `/logistics-report/${id}`,
+      providesTags: (_result, _error, id) => [{ type: "LOGISTICS_REPORT", id }],
+    }),
+    createLogisticsReport: builder.mutation<void, LogisticsReportDTO>({
+      query: (report) => ({
+        url: "/logistics-report",
+        method: "POST",
+        body: report,
+      }),
+      invalidatesTags: ["LOGISTICS_REPORT"],
+    }),
+    updateLogisticsReport: builder.mutation<
+      void,
+      { id: string; report: LogisticsReportDTO }
+    >({
+      query: ({ id, report }) => ({
+        url: `/logistics-report/${id}`,
+        method: "PUT",
+        body: report,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        "LOGISTICS_REPORT",
+        { type: "LOGISTICS_REPORT", id },
+      ],
+    }),
+    deleteLogisticsReport: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/logistics-report/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["LOGISTICS_REPORT"],
+    }),
+    //#endregion
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    //#region LOGISTICS TRACKING
+    getLogisticsTrackings: builder.query<LogisticsTrackingDTO[], void>({
+      query: () => "/logistics-tracking",
+      providesTags: ["LOGISTICS_TRACKINGS"],
+    }),
+
+    getLogisticsTrackingById: builder.query<LogisticsTrackingDTO, string>({
+      query: (id) => `/logistics-tracking/${id}`,
+      providesTags: (_result, _error, id) => [
+        { type: "LOGISTICS_TRACKINGS", id },
+      ],
+    }),
+
+    createLogisticsTracking: builder.mutation<void, LogisticsTrackingDTO>({
+      query: (tracking) => ({
+        url: "/logistics-tracking",
+        method: "POST",
+        body: tracking,
+      }),
+      invalidatesTags: ["LOGISTICS_TRACKINGS"],
+    }),
+
+    updateLogisticsTracking: builder.mutation<
+      void,
+      { id: string; tracking: LogisticsTrackingDTO }
+    >({
+      query: ({ id, tracking }) => ({
+        url: `/logistics-tracking/${id}`,
+        method: "PUT",
+        body: tracking,
+      }),
+      invalidatesTags: ["LOGISTICS_TRACKINGS"],
+    }),
+
+    deleteLogisticsTracking: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/logistics-tracking/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["LOGISTICS_TRACKINGS"],
+    }),
+    //#endregion
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    //#region MUTUAL SETTLEMENT VECTAN ILCA
+    getMutualSettlementVectanIlcas: builder.query<
+      MutualSettlementVectanIlcaDTO[],
+      void
+    >({
+      query: () => ({ url: "msvil" }),
+      providesTags: ["MutualSettlementVectanIlca"],
+    }),
+
+    getMutualSettlementVectanIlcaById: builder.query<
+      MutualSettlementVectanIlcaDTO,
+      string
+    >({
+      query: (id) => `msvil/${id}`,
+      providesTags: (_result, _error, id) => [
+        { type: "MutualSettlementVectanIlca", id },
+      ],
+    }),
+
+    createMutualSettlementVectanIlca: builder.mutation<
+      void,
+      MutualSettlementVectanIlcaDTO
+    >({
+      query: (body) => ({
+        url: "msvil",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["MutualSettlementVectanIlca"],
+    }),
+
+    updateMutualSettlementVectanIlca: builder.mutation<
+      void,
+      { id: string; data: Partial<MutualSettlementVectanIlcaDTO> }
+    >({
+      query: ({ id, data }) => ({
+        url: `msvil/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["MutualSettlementVectanIlca"],
+    }),
+
+    deleteMutualSettlementVectanIlca: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `msvil/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["MutualSettlementVectanIlca"],
+    }),
+    //#endregion
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    //#region MUSE VECTAN AND OTHER
+    getMuseVectanAndOthers: builder.query<MuseVectanAndOtherDTO[], void>({
+      query: () => "/msvo",
+      providesTags: ["MuseVectanAndOther"],
+    }),
+    getMuseVectanAndOtherById: builder.query<MuseVectanAndOtherDTO, string>({
+      query: (id) => `/msvo/${id}`,
+      providesTags: ["MuseVectanAndOther"],
+    }),
+    createMuseVectanAndOther: builder.mutation<
+      void,
+      Partial<MuseVectanAndOtherDTO>
+    >({
+      query: (msvo) => ({
+        url: "/msvo",
+        method: "POST",
+        body: msvo,
+      }),
+      invalidatesTags: ["MuseVectanAndOther"],
+    }),
+    updateMuseVectanAndOther: builder.mutation<
+      void,
+      { id: string; msvo: Partial<MuseVectanAndOtherDTO> }
+    >({
+      query: ({ id, msvo }) => ({
+        url: `/msvo/${id}`,
+        method: "PUT",
+        body: msvo,
+      }),
+      invalidatesTags: ["MuseVectanAndOther"],
+    }),
+    deleteMuseVectanAndOther: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/msvo/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["MuseVectanAndOther"],
+    }),
+    //#endregion
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    //#region MUTUAL SETTLEMENTS ILCA OTHER
+    getMutualSettlementsILCAOther: builder.query<
+      MutualSettlementsILCAOtherDTO[],
+      void
+    >({
+      query: () => "/msio",
+      providesTags: ["mutual-settlements-ilca-other"],
+    }),
+
+    getMutualSettlementsILCAOtherById: builder.query<
+      MutualSettlementsILCAOtherDTO,
+      string
+    >({
+      query: (id) => `/msio/${id}`,
+      providesTags: (_res, _err, id) => [
+        { type: "mutual-settlements-ilca-other", id },
+      ],
+    }),
+
+    createMutualSettlementsILCAOther: builder.mutation<
+      void,
+      Partial<MutualSettlementsILCAOtherDTO>
+    >({
+      query: (msio) => ({
+        url: "/msio",
+        method: "POST",
+        body: msio,
+      }),
+      invalidatesTags: ["mutual-settlements-ilca-other"],
+    }),
+
+    updateMutualSettlementsILCAOther: builder.mutation<
+      void,
+      { id: string; data: Partial<MutualSettlementsILCAOtherDTO> }
+    >({
+      query: ({ id, data }) => ({
+        url: `/msio/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: (_res, _err, { id }) => [
+        "mutual-settlements-ilca-other",
+        { type: "mutual-settlements-ilca-other", id },
+      ],
+    }),
+
+    deleteMutualSettlementsILCAOther: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/msio/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_res, _err, id) => [
+        "mutual-settlements-ilca-other",
+        { type: "mutual-settlements-ilca-other", id },
+      ],
+    }),
+    //#endregion
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
+    /* ======================================================== */
   }),
 });
 
@@ -350,4 +618,60 @@ export const {
   useUpdateTransferItemMutation,
   useGetTransferItemsQuery,
   useDeleteTransferItemMutation,
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  useGetLogisticsReportByIdQuery,
+  useCreateLogisticsReportMutation,
+  useDeleteLogisticsReportMutation,
+  useGetLogisticsReportQuery,
+  useUpdateLogisticsReportMutation,
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  useGetLogisticsTrackingByIdQuery,
+  useGetLogisticsTrackingsQuery,
+  useCreateLogisticsTrackingMutation,
+  useUpdateLogisticsTrackingMutation,
+  useDeleteLogisticsTrackingMutation,
+
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  useGetMutualSettlementVectanIlcaByIdQuery,
+  useGetMutualSettlementVectanIlcasQuery,
+  useCreateMutualSettlementVectanIlcaMutation,
+  useUpdateMutualSettlementVectanIlcaMutation,
+  useDeleteMutualSettlementVectanIlcaMutation,
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  useCreateMuseVectanAndOtherMutation,
+  useUpdateMuseVectanAndOtherMutation,
+  useDeleteMuseVectanAndOtherMutation,
+  useGetMuseVectanAndOtherByIdQuery,
+  useGetMuseVectanAndOthersQuery,
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  useGetMutualSettlementsILCAOtherByIdQuery,
+  useGetMutualSettlementsILCAOtherQuery,
+  useCreateMutualSettlementsILCAOtherMutation,
+  useUpdateMutualSettlementsILCAOtherMutation,
+  useDeleteMutualSettlementsILCAOtherMutation,
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
 } = salesApi;
