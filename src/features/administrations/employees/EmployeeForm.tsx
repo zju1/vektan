@@ -36,6 +36,7 @@ export default function DepartmentFormModal() {
   const [update, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
   const { data: singleData, isLoading } = useGetEmployeeByIdQuery(id, {
     skip: !id || !isModalOpen,
+    refetchOnMountOrArgChange: true,
   });
 
   const isEditMode = !!id;
