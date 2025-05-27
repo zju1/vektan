@@ -26,6 +26,8 @@ import {
   useGetClientOrdersQuery,
   useUpdateClientOrderMutation,
 } from "@/app/store/services/sales.api";
+import { useTranslation } from "react-i18next";
+import { useGetClientsQuery } from "@/app/store/services/clients.api";
 
 export interface IClientOrder {
   _id: string;
@@ -58,7 +60,8 @@ export function ClientOrdersPage() {
   const [create, { isLoading: createLoading }] = useCreateClientOrderMutation();
   const [update, { isLoading: updateLoading }] = useUpdateClientOrderMutation();
   const [remove] = useDeleteClientOrderMutation();
-
+  const { t } = useTranslation();
+  const { data: clients } = useGetClientsQuery();
   const loading = createLoading || updateLoading;
 
   // Handle form submission
@@ -353,15 +356,16 @@ export function ClientOrdersPage() {
 
             <Form.Item
               name="buyer"
-              label="Покупатель"
-              rules={[{ required: true, message: "Выберите покупателя" }]}
+              label={t("buyer")}
+              rules={[{ required: true, message: t("required") }]}
             >
-              <Select>
-                <Select.Option value="ILCA-FZCO">ILCA-FZCO</Select.Option>
-                <Select.Option value="Vektan Chemical">
-                  Vektan Chemical
-                </Select.Option>
-              </Select>
+              <Select
+                options={clients?.map((item) => ({
+                  value: item._id,
+                  label: item.clientName,
+                }))}
+                className="w-full"
+              />
             </Form.Item>
 
             <Form.Item

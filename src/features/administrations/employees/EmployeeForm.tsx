@@ -139,15 +139,13 @@ export default function DepartmentFormModal() {
               >
                 <Input />
               </Form.Item>
-              {!id && (
-                <Form.Item
-                  name="password"
-                  label={t("password")}
-                  rules={[{ required: true, message: t("required") }]}
-                >
-                  <Input />
-                </Form.Item>
-              )}
+              <Form.Item
+                name="password"
+                label={t("password")}
+                rules={[{ required: true, message: t("required") }]}
+              >
+                <Input />
+              </Form.Item>
 
               <Form.Item
                 name="position"

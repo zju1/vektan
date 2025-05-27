@@ -7,6 +7,7 @@ import {
   DatePicker,
   message,
   Spin,
+  Select,
 } from "antd";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -18,6 +19,7 @@ import {
   useGetMuseVectanAndOtherByIdQuery,
   useUpdateMuseVectanAndOtherMutation,
 } from "@/app/store/services/sales.api";
+import { useGetClientsQuery } from "@/app/store/services/clients.api";
 
 export default function MuseVectanAndOtherFormModal() {
   const { t } = useTranslation();
@@ -81,7 +83,7 @@ export default function MuseVectanAndOtherFormModal() {
       message.error(t("errorOccuredInCRUD"));
     }
   };
-
+  const { data: clients } = useGetClientsQuery();
   return (
     <>
       {!isEditMode && (
@@ -108,8 +110,20 @@ export default function MuseVectanAndOtherFormModal() {
             className="mt-4"
           >
             <div className="grid gap-4">
+              <Form.Item
+                name="buyer"
+                label={t("buyer")}
+                rules={[{ required: true, message: t("required") }]}
+              >
+                <Select
+                  options={clients?.map((item) => ({
+                    value: item._id,
+                    label: item.clientName,
+                  }))}
+                  className="w-full"
+                />
+              </Form.Item>
               {[
-                ["buyer", "text"],
                 ["country", "text"],
                 ["cotractNumber", "text"],
                 ["contractDate", "date"],

@@ -6,6 +6,7 @@ import {
   Button,
   message,
   DatePicker,
+  Select,
 } from "antd";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,7 @@ import {
   useUpdateMutualSettlementVectanIlcaMutation,
   useGetMutualSettlementVectanIlcaByIdQuery,
 } from "@/app/store/services/sales.api";
+import { useGetClientsQuery } from "@/app/store/services/clients.api";
 
 export default function MutualSettlementVectanIlcaFormModal() {
   const { t } = useTranslation();
@@ -33,7 +35,7 @@ export default function MutualSettlementVectanIlcaFormModal() {
   const { data } = useGetMutualSettlementVectanIlcaByIdQuery(id!, {
     skip: !id || !isModalOpen,
   });
-
+  const { data: clients } = useGetClientsQuery();
   useEffect(() => {
     if (id) setIsModalOpen(true);
   }, [id]);
@@ -106,7 +108,6 @@ export default function MutualSettlementVectanIlcaFormModal() {
           <div className="grid gap-4">
             {[
               "contractNumber",
-              "buyer",
               "country",
               "contractSumm",
               "actualStock",
@@ -131,7 +132,19 @@ export default function MutualSettlementVectanIlcaFormModal() {
                 )}
               </Form.Item>
             ))}
-
+            <Form.Item
+              name="buyer"
+              label={t("buyer")}
+              rules={[{ required: true, message: t("required") }]}
+            >
+              <Select
+                options={clients?.map((item) => ({
+                  value: item._id,
+                  label: item.clientName,
+                }))}
+                className="w-full"
+              />
+            </Form.Item>
             <Form.Item name="contractDate" label={t("contractDate")}>
               {" "}
               <DatePicker className="w-full" />{" "}

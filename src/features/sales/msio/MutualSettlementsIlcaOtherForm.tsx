@@ -8,6 +8,7 @@ import {
   Button,
   message,
   Spin,
+  Select,
 } from "antd";
 import type { MutualSettlementsILCAOtherDTO } from "./mutual-settlements-ilca-other.dto";
 import { useTranslation } from "react-i18next";
@@ -19,6 +20,7 @@ import {
   useUpdateMutualSettlementsILCAOtherMutation,
   useGetMutualSettlementsILCAOtherByIdQuery,
 } from "@/app/store/services/sales.api";
+import { useGetClientsQuery } from "@/app/store/services/clients.api";
 
 export default function MutualSettlementsIlcaOtherForm() {
   const { t } = useTranslation();
@@ -85,7 +87,7 @@ export default function MutualSettlementsIlcaOtherForm() {
       message.error(t("errorOccuredInCRUD"));
     }
   };
-
+  const { data: clients } = useGetClientsQuery();
   return (
     <>
       {!isEditMode && (
@@ -117,7 +119,13 @@ export default function MutualSettlementsIlcaOtherForm() {
                 label={t("buyer")}
                 rules={[{ required: true, message: t("required") }]}
               >
-                <Input />
+                <Select
+                  options={clients?.map((item) => ({
+                    value: item._id,
+                    label: item.clientName,
+                  }))}
+                  className="w-full"
+                />
               </Form.Item>
               <Form.Item
                 name="shipmentDate"

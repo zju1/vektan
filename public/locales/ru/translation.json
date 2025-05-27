@@ -258,5 +258,6 @@
   "days": "Дни",
   "paymentDeadline": "Крайний срок оплаты",
   "mutualSettlementsIlcaOther": "Взаиморасчеты ILCA (прочее)",
-  "newRecord": "Новая запись"
+  "newRecord": "Новая запись",
+  "editClient": "Редактировать клиента"
 }

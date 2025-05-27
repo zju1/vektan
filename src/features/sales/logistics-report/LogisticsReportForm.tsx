@@ -6,6 +6,7 @@ import {
   message,
   DatePicker,
   InputNumber,
+  Select,
 } from "antd";
 import type { LogisticsReportDTO } from "./logistics-report.dto";
 import { useTranslation } from "react-i18next";
@@ -17,6 +18,9 @@ import {
   useUpdateLogisticsReportMutation,
 } from "@/app/store/services/sales.api";
 import moment from "moment";
+import { useGetClientsQuery } from "@/app/store/services/clients.api";
+import { useGetUnitTypesQuery } from "@/app/store/services/settings.api";
+import { departmentStatusOptions } from "@/features/administrations/departments/department.dto";
 
 export default function LogisticsReportFormModal() {
   const { t } = useTranslation();
@@ -25,6 +29,8 @@ export default function LogisticsReportFormModal() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const reportId = searchParams.get("editLogisticsReportId");
+  const { data: clients } = useGetClientsQuery();
+  const { data: unitTypes } = useGetUnitTypesQuery();
 
   const [create, { isLoading: isCreating }] =
     useCreateLogisticsReportMutation();
@@ -102,14 +108,10 @@ export default function LogisticsReportFormModal() {
           <div className="grid gap-4 grid-cols-2">
             {[
               "seller",
-              "buyer",
               "consignee",
               "invoiceNumber",
               "mark",
-              "bagType",
               "quantity",
-              "unitType",
-              "status",
               "currentLocation",
               "comment",
             ].map((field) => (
@@ -119,9 +121,72 @@ export default function LogisticsReportFormModal() {
                 label={t(field)}
                 rules={[{ required: true, message: t("required") }]}
               >
-                <Input />
+                {["quantity"].includes(field) ? (
+                  <InputNumber className="w-full" />
+                ) : (
+                  <Input />
+                )}
               </Form.Item>
             ))}
+            <Form.Item
+              name="buyer"
+              label={t("buyer")}
+              rules={[{ required: true, message: t("required") }]}
+            >
+              <Select
+                options={clients?.map((item) => ({
+                  value: item._id,
+                  label: item.clientName,
+                }))}
+                className="w-full"
+              />
+            </Form.Item>
+            <Form.Item
+              name="unitType"
+              label={t("unitType")}
+              rules={[{ required: true, message: t("required") }]}
+            >
+              <Select
+                options={unitTypes?.map((item) => ({
+                  value: item._id,
+                  label: item.name,
+                }))}
+                className="w-full"
+              />
+            </Form.Item>
+            <Form.Item
+              name="bagType"
+              label="Тип мешка"
+              rules={[{ required: true, message: t("required") }]}
+            >
+              <Select>
+                <Select.Option value="Большой (1000 кг)">
+                  Большой (1000 кг)
+                </Select.Option>
+                <Select.Option value="Большой (500 кг)">
+                  Большой (500 кг)
+                </Select.Option>
+                <Select.Option value="Маленький (25 кг)">
+                  Маленький (25 кг)
+                </Select.Option>
+                <Select.Option value="Маленький (20 кг)">
+                  Маленький (20 кг)
+                </Select.Option>
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="status"
+              label={t("status")}
+              rules={[{ required: true, message: t("required") }]}
+            >
+              <Select>
+                {departmentStatusOptions.map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    {t(option.label)}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
             <Form.Item name="invoiceDate" label={t("invoiceDate")}>
               <DatePicker className="w-full" />
             </Form.Item>

@@ -1,4 +1,13 @@
-import { Modal, Form, Input, Button, message, DatePicker, Spin } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  message,
+  DatePicker,
+  Spin,
+  Select,
+} from "antd";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -9,6 +18,8 @@ import {
   useGetLogisticsTrackingByIdQuery,
   useUpdateLogisticsTrackingMutation,
 } from "@/app/store/services/sales.api";
+import { useGetUnitTypesQuery } from "@/app/store/services/settings.api";
+import { useGetClientsQuery } from "@/app/store/services/clients.api";
 
 export default function LogisticsTrackingFormModal() {
   const { t } = useTranslation();
@@ -25,6 +36,8 @@ export default function LogisticsTrackingFormModal() {
   const { data, isLoading } = useGetLogisticsTrackingByIdQuery(trackingId!, {
     skip: !trackingId || !isModalOpen,
   });
+  const { data: unitTypes } = useGetUnitTypesQuery();
+  const { data: clients } = useGetClientsQuery();
 
   const isEditMode = !!trackingId;
 
@@ -109,12 +122,9 @@ export default function LogisticsTrackingFormModal() {
             <div className="grid gap-4 max-h-[65dvh] overflow-auto pr-2">
               {[
                 "invoiceNumber",
-                "client",
                 "country",
                 "city",
                 "mark",
-                "bagType",
-                "unitType",
                 "lotNumber",
                 "carrier",
                 "govNumber",
@@ -131,7 +141,52 @@ export default function LogisticsTrackingFormModal() {
                   <Input />
                 </Form.Item>
               ))}
-
+              <Form.Item
+                name="client"
+                label={t("client")}
+                rules={[{ required: true, message: t("required") }]}
+              >
+                <Select
+                  options={clients?.map((item) => ({
+                    value: item._id,
+                    label: item.clientName,
+                  }))}
+                  className="w-full"
+                />
+              </Form.Item>
+              <Form.Item
+                name="unitType"
+                label={t("unitType")}
+                rules={[{ required: true, message: t("required") }]}
+              >
+                <Select
+                  options={unitTypes?.map((item) => ({
+                    value: item._id,
+                    label: item.name,
+                  }))}
+                  className="w-full"
+                />
+              </Form.Item>
+              <Form.Item
+                name="bagType"
+                label="Тип мешка"
+                rules={[{ required: true, message: t("required") }]}
+              >
+                <Select>
+                  <Select.Option value="Большой (1000 кг)">
+                    Большой (1000 кг)
+                  </Select.Option>
+                  <Select.Option value="Большой (500 кг)">
+                    Большой (500 кг)
+                  </Select.Option>
+                  <Select.Option value="Маленький (25 кг)">
+                    Маленький (25 кг)
+                  </Select.Option>
+                  <Select.Option value="Маленький (20 кг)">
+                    Маленький (20 кг)
+                  </Select.Option>
+                </Select>
+              </Form.Item>
               <Form.Item
                 name="quantity"
                 label={t("quantity")}
