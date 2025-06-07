@@ -166,5 +166,6 @@
   "helpingRawMaterial": "Yordamchi xom ashyo",
   "productName": "Наименование товара",
   "dealing": "На согласовании",
-  "confirmed": "Утвержден"
+  "confirmed": "Утвержден",
+  "consignees": "Грузополучателей"
 }

@@ -1,39 +1,71 @@
 import {
   useChangeProductionOrderMutation,
+  useDeleteProductionOrderMutation,
   useGetProductionrdersQuery,
 } from "@/app/store/services/sales.api";
 import { TablePage } from "@/components/table-page";
 import { useTranslation } from "react-i18next";
-import { Button, Descriptions, Modal, notification, Tag } from "antd";
+import { ProductionOrderForm } from "./ProductionOrderForm";
+import { Button, Descriptions, Modal, Tag, message, notification } from "antd";
 import {
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  SendOutlined,
   CheckOutlined,
   CloseOutlined,
-  EyeOutlined,
-  PlusOutlined,
 } from "@ant-design/icons";
 import { useCallback, useMemo, useState } from "react";
 import { formatDate } from "@/lib/utils/date-utils";
+import { useSearchParams } from "react-router-dom";
 import type { ColumnsType } from "antd/es/table";
 import type {
   ProductionOrderStatus,
   SingleProductionOrder,
-} from "@/features/sales/production-orders/production-order.dto";
-import { ProductionRejectionModal } from "./ProductionRejectionModal";
-import { useNavigate } from "react-router-dom";
+} from "./production-order.dto";
+import { CommercialRejectionModal } from "./CommercialRejectionModal";
 
 export function ProductionOrderPage() {
   const { t } = useTranslation();
-  const { data, isFetching } = useGetProductionrdersQuery({
-    status:
-      "accepted_by_production,planned,under_review_by_production,planned,producing,produced",
-  });
+  const { data, isFetching, refetch } = useGetProductionrdersQuery({});
+  const [searchParams, setSearchParams] = useSearchParams();
   const [reject, setReject] = useState(false);
+  const [change, { isLoading: statusChanging }] =
+    useChangeProductionOrderMutation();
   const [viewRecord, setViewRecord] = useState<SingleProductionOrder | null>(
     null
   );
-  const navigate = useNavigate();
-  const [change, { isLoading: statusChanging }] =
-    useChangeProductionOrderMutation();
+  const [remove, { isLoading: isDeleting }] =
+    useDeleteProductionOrderMutation();
+  const [open, setOpen] = useState(false);
+
+  const handleEdit = useCallback(
+    (id: string) => {
+      searchParams.set("editProductionOrderId", id);
+      setSearchParams(searchParams);
+      setOpen(true);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const handleDelete = useCallback(
+    async (id: string) => {
+      Modal.confirm({
+        title: t("warning"),
+        content: t("deleteSure"),
+        onOk: async () => {
+          try {
+            await remove(id).unwrap();
+            message.success(t("deleted"));
+            refetch();
+          } catch (error) {
+            message.error(t("errorOccured"));
+          }
+        },
+      });
+    },
+    [refetch, remove, t]
+  );
 
   const columns: ColumnsType<SingleProductionOrder> = useMemo(
     () => [
@@ -82,6 +114,7 @@ export function ProductionOrderPage() {
         title: t("status"),
         dataIndex: "status",
         key: "status",
+        width: 200,
         render: (status: ProductionOrderStatus) => (
           <Tag
             color={
@@ -149,36 +182,56 @@ export function ProductionOrderPage() {
         render: (_, record) => (
           <div className="flex items-center gap-2 [&>*]:shrink-0">
             <Button
+              type="text"
+              size="small"
               icon={<EyeOutlined />}
               onClick={() => setViewRecord(record)}
             />
-            {record.status === "planned" && (
-              <Button
-                icon={<PlusOutlined />}
-                onClick={() =>
-                  navigate(`/production/recipes?poId=${record._id}`)
-                }
-              />
-            )}
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record._id)}
+            />
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => handleDelete(record._id)}
+              loading={isDeleting}
+            />
           </div>
         ),
       },
     ],
-    [navigate, t]
+    [t, isDeleting, handleEdit, handleDelete]
   );
 
-  const approveAndPlan = useCallback(async () => {
-    await change({ _id: viewRecord?._id, status: "planned" }).unwrap();
+  const sendToCommercialDirector = useCallback(async () => {
+    await change({ _id: viewRecord?._id, status: "on_approval" }).unwrap();
     notification.success({
-      message: t("SOApprovedToPlan"),
+      message: t("SOsuccessfullySentToCommercialDirector"),
+    });
+    setViewRecord(null);
+  }, [change, t, viewRecord?._id]);
+
+  const sendToProductionDirector = useCallback(async () => {
+    await change({
+      _id: viewRecord?._id,
+      status: "under_review_by_production",
+    }).unwrap();
+    notification.success({
+      message: t("approvedAndSentToProdDirector"),
     });
     setViewRecord(null);
   }, [change, t, viewRecord?._id]);
 
   return (
     <>
-      <TablePage
-        title="Сводная таблица заказов"
+      <TablePage<SingleProductionOrder>
+        title={t("productionOrders")}
+        onCreate={() => setOpen(true)}
         table={{
           columns,
           loading: isFetching,
@@ -197,7 +250,13 @@ export function ProductionOrderPage() {
       >
         {viewRecord && (
           <div className="grid gap-4">
-            <Descriptions column={1} bordered size="small" className="mt-4">
+            <Descriptions
+              column={1}
+              labelStyle={{ maxWidth: "150px" }}
+              bordered
+              size="small"
+              className="mt-4"
+            >
               <Descriptions.Item label={t("buyer")}>
                 {viewRecord.buyer?.clientName}
               </Descriptions.Item>
@@ -213,7 +272,7 @@ export function ProductionOrderPage() {
               <Descriptions.Item label={t("mark")}>
                 {viewRecord.mark?.name}
               </Descriptions.Item>
-              <Descriptions.Item label={t("quantity")}>
+              <Descriptions.Item label={t("volume")}>
                 {viewRecord.quantity}
               </Descriptions.Item>
               <Descriptions.Item label={t("unitType")}>
@@ -244,11 +303,26 @@ export function ProductionOrderPage() {
               <Descriptions.Item label={t("status")}>
                 {t(viewRecord.status)}
               </Descriptions.Item>
+              {viewRecord.status === "rejected" && (
+                <Descriptions.Item label={t("commercialRejectionReason")}>
+                  {viewRecord.commercialRejectionReason}
+                </Descriptions.Item>
+              )}
               <Descriptions.Item label={t("comments")}>
                 {viewRecord.comments}
               </Descriptions.Item>
             </Descriptions>
-            {viewRecord.status === "under_review_by_production" && (
+            {viewRecord.status === "draft" && (
+              <Button
+                loading={statusChanging}
+                icon={<SendOutlined />}
+                type="primary"
+                onClick={sendToCommercialDirector}
+              >
+                {t("sendToCommercialDirector")}{" "}
+              </Button>
+            )}
+            {viewRecord.status === "on_approval" && (
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   icon={<CloseOutlined />}
@@ -263,27 +337,34 @@ export function ProductionOrderPage() {
                   icon={<CheckOutlined />}
                   color="cyan"
                   variant="solid"
-                  onClick={approveAndPlan}
+                  onClick={sendToProductionDirector}
                 >
-                  {t("approveAndAddToPlan")}{" "}
+                  {t("approveAndSendToProductionDirector")}{" "}
                 </Button>
               </div>
             )}
           </div>
         )}
-
-        {reject && (
-          <ProductionRejectionModal
-            open={reject}
-            centered
-            title={t("rejectToProduce", { doc: viewRecord?.id })}
-            onCancel={() => setReject(false)}
-            onClose={() => setReject(false)}
-            onReject={() => setViewRecord(null)}
-            order={viewRecord!}
-          />
-        )}
       </Modal>
+      <ProductionOrderForm
+        onClose={() => setOpen(false)}
+        open={open}
+        title={
+          searchParams.get("editProductionOrderId")
+            ? t("editProductionOrder")
+            : t("createProductionOrder")
+        }
+      />
+      {reject && (
+        <CommercialRejectionModal
+          open={reject}
+          centered
+          title={t("commercialReject", { doc: viewRecord?.id })}
+          onCancel={() => setReject(false)}
+          onReject={() => setViewRecord(null)}
+          order={viewRecord!}
+        />
+      )}
     </>
   );
 }

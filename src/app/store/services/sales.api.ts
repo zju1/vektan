@@ -3,8 +3,6 @@ import type { RootState } from "../store.config";
 import { envVariables } from "@/config/env";
 import { IClientOrder } from "@/features/sales/ClientOrders";
 import { RequestParamsType } from "@/@types";
-import type { ProductionOrder } from "@/features/production/orders/ProductionOrders";
-import type { ProcessData } from "@/features/production/processes/ProductionProcesses";
 import type { StockItem } from "@/features/warehouse/analyze/StockAnalyze";
 import type { MaterialData } from "@/features/warehouse/fabricants/FabricantsPage";
 import type { RawMaterialData } from "@/features/warehouse/helper-fabricants/HelperFabricantsPage";
@@ -14,6 +12,16 @@ import type { LogisticsTrackingDTO } from "@/features/sales/logistics-tracking/l
 import type { MutualSettlementVectanIlcaDTO } from "@/features/sales/msvil/msvil.dto";
 import type { MuseVectanAndOtherDTO } from "@/features/sales/msvo/muse-vectan-and-other.dto";
 import type { MutualSettlementsILCAOtherDTO } from "@/features/sales/msio/mutual-settlements-ilca-other.dto";
+import type {
+  IProductionOrder,
+  SingleProductionOrder,
+} from "@/features/sales/production-orders/production-order.dto";
+import type {
+  RecipeModelDTO,
+  SingleRecipe,
+} from "@/features/production/recipes/recipe.dto";
+import { SingleProductionJournal } from "@/features/production/processes/production-process.dto";
+import type { SingleProductionQA } from "@/features/production/laboratory/production-lab.dto";
 
 export const salesApi = createApi({
   reducerPath: "salesApi",
@@ -42,8 +50,47 @@ export const salesApi = createApi({
     "MutualSettlementVectanIlca",
     "MuseVectanAndOther",
     "mutual-settlements-ilca-other",
+    "Recipes",
+    "ProductionJournal",
+    "ProductionLab",
   ],
   endpoints: (builder) => ({
+    getRecipeModels: builder.query<SingleRecipe[], void>({
+      query: () => "/recipe",
+      providesTags: ["Recipes"],
+    }),
+    getRecipeModelById: builder.query<
+      RecipeModelDTO,
+      { id: string; po?: string }
+    >({
+      query: ({ id }) => `/recipe/${id}`,
+    }),
+    createRecipeModel: builder.mutation<void, RecipeModelDTO>({
+      query: (recipe) => ({
+        url: "/recipe",
+        method: "POST",
+        body: recipe,
+      }),
+      invalidatesTags: ["Recipes"],
+    }),
+    updateRecipeModel: builder.mutation<
+      void,
+      { id: string; recipe: RecipeModelDTO }
+    >({
+      query: ({ id, recipe }) => ({
+        url: `/recipe/${id}`,
+        method: "PUT",
+        body: recipe,
+      }),
+      invalidatesTags: ["Recipes"],
+    }),
+    deleteRecipeModel: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/recipe/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Recipes"],
+    }),
     //#region CLIENT ORDERS
     getClientOrders: builder.query<IClientOrder[], RequestParamsType>({
       query: (params) => ({
@@ -82,22 +129,35 @@ export const salesApi = createApi({
     /* ======================================================== */
     /* ======================================================== */
     //#region PRODUCTION ORDERS
-    getProductionrders: builder.query<ProductionOrder[], RequestParamsType>({
+    getProductionrders: builder.query<
+      SingleProductionOrder[],
+      RequestParamsType
+    >({
       query: (params) => ({
         params,
         url: "production-orders",
       }),
       providesTags: ["PRODUCTION_ORDERS"],
     }),
-    createProductionOrder: builder.mutation<ProductionOrder, ProductionOrder>({
-      query: (body) => ({
-        body,
-        url: "production-orders",
-        method: "POST",
+    getProductionrderById: builder.query<IProductionOrder, string>({
+      query: (id) => ({
+        url: `production-orders/${id}`,
       }),
-      invalidatesTags: ["PRODUCTION_ORDERS"],
     }),
-    updateProductionOrder: builder.mutation<ProductionOrder, ProductionOrder>({
+    createProductionOrder: builder.mutation<IProductionOrder, IProductionOrder>(
+      {
+        query: (body) => ({
+          body,
+          url: "production-orders",
+          method: "POST",
+        }),
+        invalidatesTags: ["PRODUCTION_ORDERS"],
+      }
+    ),
+    updateProductionOrder: builder.mutation<
+      IProductionOrder,
+      Required<IProductionOrder>
+    >({
       query: ({ _id, ...body }) => ({
         body,
         url: `production-orders/${_id}`,
@@ -105,7 +165,18 @@ export const salesApi = createApi({
       }),
       invalidatesTags: ["PRODUCTION_ORDERS"],
     }),
-    deleteProductionOrder: builder.mutation<ProductionOrder, string>({
+    changeProductionOrder: builder.mutation<
+      IProductionOrder,
+      Partial<IProductionOrder>
+    >({
+      query: ({ _id, ...body }) => ({
+        body,
+        url: `production-orders/${_id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["PRODUCTION_ORDERS", "Recipes"],
+    }),
+    deleteProductionOrder: builder.mutation<IProductionOrder, string>({
       query: (id) => ({
         url: `production-orders/${id}`,
         method: "DELETE",
@@ -119,36 +190,7 @@ export const salesApi = createApi({
     /* ======================================================== */
     /* ======================================================== */
     //#region PROCESS DATA
-    getProcessData: builder.query<ProcessData[], RequestParamsType>({
-      query: (params) => ({
-        params,
-        url: "process-data",
-      }),
-      providesTags: ["PROCESS_DATA"],
-    }),
-    createProcessData: builder.mutation<ProcessData, ProcessData>({
-      query: (body) => ({
-        body,
-        url: "process-data",
-        method: "POST",
-      }),
-      invalidatesTags: ["PROCESS_DATA"],
-    }),
-    updateProcesData: builder.mutation<ProcessData, ProcessData>({
-      query: ({ _id, ...body }) => ({
-        body,
-        url: `process-data/${_id}`,
-        method: "PUT",
-      }),
-      invalidatesTags: ["PROCESS_DATA"],
-    }),
-    deleteProcessData: builder.mutation<ProcessData, string>({
-      query: (id) => ({
-        url: `process-data/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["PROCESS_DATA"],
-    }),
+
     //#endregion
     /* ======================================================== */
     /* ======================================================== */
@@ -556,6 +598,16 @@ export const salesApi = createApi({
     /* ======================================================== */
     /* ======================================================== */
     /* ======================================================== */
+    //#region Production Journal
+    getProductionJournal: builder.query<SingleProductionJournal[], void>({
+      query: () => `prod-journal`,
+      providesTags: ["ProductionJournal"],
+    }),
+    //#endregion
+    getLaboratoryJournal: builder.query<SingleProductionQA[], void>({
+      query: () => `prod-qa`,
+      providesTags: ["ProductionLab"],
+    }),
   }),
 });
 
@@ -573,15 +625,6 @@ export const {
   useUpdateProductionOrderMutation,
   useCreateProductionOrderMutation,
   useDeleteProductionOrderMutation,
-  /* ============================================================= */
-  /* ============================================================= */
-  /* ============================================================= */
-  /* ============================================================= */
-  /* ============================================================= */
-  useCreateProcessDataMutation,
-  useUpdateProcesDataMutation,
-  useDeleteProcessDataMutation,
-  useGetProcessDataQuery,
   /* ============================================================= */
   /* ============================================================= */
   /* ============================================================= */
@@ -674,4 +717,18 @@ export const {
   /* ============================================================= */
   /* ============================================================= */
   /* ============================================================= */
+  useGetProductionrderByIdQuery,
+  useChangeProductionOrderMutation,
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  /* ============================================================= */
+  useGetRecipeModelByIdQuery,
+  useGetRecipeModelsQuery,
+  useCreateRecipeModelMutation,
+  useUpdateRecipeModelMutation,
+  useDeleteRecipeModelMutation,
+  useGetProductionJournalQuery,
+  useGetLaboratoryJournalQuery,
 } = salesApi;

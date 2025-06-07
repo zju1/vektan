@@ -14,8 +14,10 @@ import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import LoginPage from "@/features/LoginPage";
 import { LogisticsPage } from "@/features/logistics/LogisticsPage";
 import NotFoundPage from "@/features/NotFound";
-import { ProductionOrdersPage } from "@/features/production/orders/ProductionOrders";
+import { ProductionLaboratoryPage } from "@/features/production/laboratory/ProductionLaboratory";
+import { ProductionOrderPage as ApprovedProductionOrdersPage } from "@/features/production/orders/ProductionOrders";
 import { ProductionProcessesPage } from "@/features/production/processes/ProductionProcesses";
+import { RecipesPage } from "@/features/production/recipes/RecipesPage";
 import { ApprovedPurchases } from "@/features/purchases/purchase-orders/ApprovedPurchasesPage";
 import { PurchaseOrdersPage } from "@/features/purchases/purchase-orders/PurchaseOrdersPage";
 import { PurchasePage } from "@/features/purchases/PurchasesPage";
@@ -25,7 +27,12 @@ import { LogisticsTrackingPage } from "@/features/sales/logistics-tracking/Logis
 import { MutualSettlementsIlcaOtherPage } from "@/features/sales/msio/MutualSettlementsIlcaOtherPage";
 import MutualSettlementVectanIlcaPage from "@/features/sales/msvil/MutualSettlementVectanIlcaPage";
 import MuseVectanAndOtherPage from "@/features/sales/msvo/MuseVectanAndOtherPage";
+import { ProductionOrderPage } from "@/features/sales/production-orders/ProductionOrderPage";
+import BagTypePage from "@/features/settings/bagTypes/BagTypePage";
+import { ConsigneesPage } from "@/features/settings/consignees/ConsigneesPage";
+import { CountriesPage } from "@/features/settings/countries/CountryPage";
 import { CurrenciesPage } from "@/features/settings/currencies/CurrenciesPage";
+import { MarkPage } from "@/features/settings/marks/MarkPage";
 import { UnitTypesPage } from "@/features/settings/unit-types/UnitTypesPage";
 import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
 import { StockAnalyzePage } from "@/features/warehouse/analyze/StockAnalyze";
@@ -49,11 +56,19 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "orders",
-            element: <ProductionOrdersPage />,
+            element: <ApprovedProductionOrdersPage />,
           },
           {
             path: "processes",
             element: <ProductionProcessesPage />,
+          },
+          {
+            path: "recipes",
+            element: <RecipesPage />,
+          },
+          {
+            path: "laboratory",
+            element: <ProductionLaboratoryPage />,
           },
         ],
       },
@@ -107,10 +122,6 @@ export const router = createBrowserRouter([
         path: "/sales",
         children: [
           {
-            path: "clients",
-            element: <ClientPage />,
-          },
-          {
             path: "client-orders",
             element: <ClientOrdersPage />,
           },
@@ -137,6 +148,10 @@ export const router = createBrowserRouter([
           {
             path: "msio",
             element: <MutualSettlementsIlcaOtherPage />,
+          },
+          {
+            path: "production-orders",
+            element: <ProductionOrderPage />,
           },
         ],
       },
@@ -195,18 +210,42 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "settings/unitTypes",
-        element: <UnitTypesPage />,
-      },
-      {
-        path: "settings/currencies",
-        element: <CurrenciesPage />,
+        path: "/settings",
+        children: [
+          {
+            path: "unitTypes",
+            element: <UnitTypesPage />,
+          },
+          {
+            path: "currencies",
+            element: <CurrenciesPage />,
+          },
+          {
+            path: "buyers",
+            element: <ClientPage />,
+          },
+          {
+            path: "consignees",
+            element: <ConsigneesPage />,
+          },
+          {
+            path: "countries",
+            element: <CountriesPage />,
+          },
+          {
+            path: "bagTypes",
+            element: <BagTypePage />,
+          },
+          {
+            path: "marks",
+            element: <MarkPage />,
+          },
+        ],
       },
       {
         path: "warehouse/acceptance-orders",
         element: <PurchasePage />,
       },
-
       {
         path: "*",
         element: <NotFoundPage />,

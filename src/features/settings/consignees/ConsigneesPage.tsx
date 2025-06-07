@@ -1,27 +1,34 @@
-import ClientFormModal from "./ClientForm";
+import ConsigneeFormModal from "./ConsigneeForm";
 import Search from "antd/es/input/Search";
 import { useTranslation } from "react-i18next";
 import { Button, Table, Tag, message, Modal } from "antd";
 import { Download } from "lucide-react";
 import type { ColumnsType } from "antd/es/table";
-import type { ClientDTO } from "./client.dto";
+import type { ConsigneeDTO } from "./consignees.dto";
 import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import { useSearchParams } from "react-router-dom";
-import {
-  useDeleteClientMutation,
-  useGetClientsQuery,
-} from "@/app/store/services/clients.api";
 
-export function ClientPage() {
+import {
+  useDeleteConsigneeMutation,
+  useGetConsigneesQuery,
+} from "@/app/store/services/settings.api";
+
+export function ConsigneesPage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // API integration
-  const { data: clients, isLoading, isError, refetch } = useGetClientsQuery();
-  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
+  const {
+    data: consignees,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetConsigneesQuery();
+  const [deleteConsignee, { isLoading: isDeleting }] =
+    useDeleteConsigneeMutation();
 
   const handleEdit = (id: string) => {
-    searchParams.set("editClientId", id);
+    searchParams.set("editConsigneeId", id);
     setSearchParams(searchParams);
   };
 
@@ -32,7 +39,7 @@ export function ClientPage() {
       content: t("deleteSure"),
       onOk: async () => {
         try {
-          await deleteClient(id).unwrap();
+          await deleteConsignee(id).unwrap();
           message.success(t("deleted"));
         } catch (error) {
           message.error(t("errorOccured"));
@@ -54,7 +61,7 @@ export function ClientPage() {
     }
   };
 
-  const columns: ColumnsType<ClientDTO> = [
+  const columns: ColumnsType<ConsigneeDTO> = [
     {
       title: "№",
       dataIndex: "index",
@@ -64,12 +71,12 @@ export function ClientPage() {
       align: "center",
     },
     {
-      title: t("clientName"),
-      dataIndex: "clientName",
-      key: "clientName",
+      title: t("consignee"),
+      dataIndex: "consigneeName",
+      key: "consigneeName",
       minWidth: 200,
-      sorter: (a: ClientDTO, b: ClientDTO) =>
-        a.clientName.localeCompare(b.clientName),
+      sorter: (a: ConsigneeDTO, b: ConsigneeDTO) =>
+        a.consigneeName.localeCompare(b.consigneeName),
     },
     {
       title: t("contactPerson"),
@@ -151,12 +158,12 @@ export function ClientPage() {
 
   return (
     <div className="grid gap-4">
-      <h1 className="font-sans font-bold text-2xl">{t("buyers")}</h1>
+      <h1 className="font-sans font-bold text-2xl">{t("consignees")}</h1>
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2">
         <Search placeholder={t("search")} />
         <div className="flex items-center justify-end gap-2">
           <Button icon={<Download className="size-4" />}>{t("export")}</Button>
-          <ClientFormModal />
+          <ConsigneeFormModal />
         </div>
       </div>
 
@@ -166,7 +173,7 @@ export function ClientPage() {
         loading={isLoading}
         columns={columns}
         rowKey={(row) => row._id!}
-        dataSource={clients || []}
+        dataSource={consignees || []}
         pagination={false}
         scroll={{ x: "max-content", y: "70dvh" }}
       />

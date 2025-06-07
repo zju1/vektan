@@ -46,7 +46,7 @@ export const navigationData = {
       title: "sale",
       icon: DollarSign,
       items: [
-        {
+        /* {
           title: "logistics",
           url: "/sales/logistics",
         },
@@ -73,14 +73,10 @@ export const navigationData = {
         {
           title: "clientOrders",
           url: "/sales/client-orders",
-        },
+        }, */
         {
-          title: "clients",
-          url: "/sales/clients",
-        },
-        {
-          title: "shipments",
-          url: "/sales/shipments",
+          title: "productionOrders",
+          url: "/sales/production-orders",
         },
       ],
     },
@@ -89,12 +85,20 @@ export const navigationData = {
       icon: Factory,
       items: [
         {
-          title: "Заказы",
+          title: "Сводная таблица заказов ",
           url: "/production/orders",
+        },
+        {
+          title: "Рецепты",
+          url: "/production/recipes",
         },
         {
           title: "Процессы",
           url: "/production/processes",
+        },
+        {
+          title: "Лаборатория",
+          url: "/production/laboratory",
         },
       ],
     },
@@ -149,6 +153,26 @@ export const navigationData = {
         {
           title: "roles",
           url: "/settings/roles",
+        },
+        {
+          title: "buyers",
+          url: "/settings/buyers",
+        },
+        {
+          title: "consignees",
+          url: "/settings/consignees",
+        },
+        {
+          title: "countries",
+          url: "/settings/countries",
+        },
+        {
+          title: "bagTypes",
+          url: "/settings/bagTypes",
+        },
+        {
+          title: "marks",
+          url: "/settings/marks",
         },
       ],
     },
