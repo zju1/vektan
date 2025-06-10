@@ -28,6 +28,8 @@ import { MutualSettlementsIlcaOtherPage } from "@/features/sales/msio/MutualSett
 import MutualSettlementVectanIlcaPage from "@/features/sales/msvil/MutualSettlementVectanIlcaPage";
 import MuseVectanAndOtherPage from "@/features/sales/msvo/MuseVectanAndOtherPage";
 import { ProductionOrderPage } from "@/features/sales/production-orders/ProductionOrderPage";
+import { ShipmentReportsPage } from "@/features/sales/shipment-reports/ShipmentReportsPage";
+import { ShipmentsPage } from "@/features/sales/shipments/ShipmentsPage";
 import BagTypePage from "@/features/settings/bagTypes/BagTypePage";
 import { ConsigneesPage } from "@/features/settings/consignees/ConsigneesPage";
 import { CountriesPage } from "@/features/settings/countries/CountryPage";
@@ -38,6 +40,7 @@ import { SuppliersPage } from "@/features/suppliers/SuppliersPage";
 import { StockAnalyzePage } from "@/features/warehouse/analyze/StockAnalyze";
 import { Fabricants } from "@/features/warehouse/fabricants/FabricantsPage";
 import { HelperFabricantsPage } from "@/features/warehouse/helper-fabricants/HelperFabricantsPage";
+import { ProducedItemsPage } from "@/features/warehouse/ready-products/ProducedItemsPage";
 import { TransferItems } from "@/features/warehouse/transfers/Transfers";
 import { MainLayout } from "@/lib/layout/MainLayout";
 import { createBrowserRouter } from "react-router-dom";
@@ -105,6 +108,10 @@ export const router = createBrowserRouter([
             element: <StockAnalyzePage />,
           },
           {
+            path: "ready-products",
+            element: <ProducedItemsPage />,
+          },
+          {
             path: "fabricants",
             element: <Fabricants />,
           },
@@ -148,6 +155,14 @@ export const router = createBrowserRouter([
           {
             path: "msio",
             element: <MutualSettlementsIlcaOtherPage />,
+          },
+          {
+            path: "shipment-reports",
+            element: <ShipmentReportsPage />,
+          },
+          {
+            path: "shipments",
+            element: <ShipmentsPage />,
           },
           {
             path: "production-orders",

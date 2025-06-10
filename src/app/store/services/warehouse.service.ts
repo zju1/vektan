@@ -3,6 +3,8 @@ import type { RootState } from "../store.config";
 import { envVariables } from "@/config/env";
 import type { CategoryDTO } from "@/features/warehouse/categories/category.dto";
 import type { ProductDTO } from "@/features/warehouse/products/product.dto";
+import type { MarkAsPackedDTO } from "@/features/production/processes/production-process.dto";
+import type { IProducedMaterial } from "@/features/warehouse/ready-products/ready-products.dto";
 
 export const warehouseApi = createApi({
   reducerPath: "warehouseApi",
@@ -18,7 +20,7 @@ export const warehouseApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["CATEGORIES", "PRODUCTS"],
+  tagTypes: ["CATEGORIES", "PRODUCTS", "PRODUCED_ITEMS"],
   endpoints: (builder) => ({
     getCategories: builder.query<CategoryDTO[], void>({
       query: () => ({
@@ -104,6 +106,45 @@ export const warehouseApi = createApi({
     /* -------------------------------------------------- */
     /* -------------------------------------------------- */
     /* -------------------------------------------------- */
+    getProducedItems: builder.query<IProducedMaterial[], void>({
+      query: () => ({
+        url: "warehouse/pm",
+      }),
+      providesTags: ["PRODUCED_ITEMS"],
+    }),
+    getProducedItemById: builder.query<ProductDTO, string | null>({
+      query: (id) => ({
+        url: `warehouse/pm/${id}`,
+      }),
+    }),
+    createProducedItem: builder.mutation<unknown, MarkAsPackedDTO>({
+      query: (body) => ({
+        url: "warehouse/pm",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: () => {
+        return ["PRODUCED_ITEMS"];
+      },
+    }),
+    updateProducedItem: builder.mutation<
+      unknown,
+      { product: ProductDTO; id: string }
+    >({
+      query: ({ product: body, id }) => ({
+        url: `warehouse/pm/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["PRODUCTS"],
+    }),
+    deleteProducedItem: builder.mutation<unknown, string>({
+      query: (id) => ({
+        url: `warehouse/pm/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["PRODUCTS"],
+    }),
   }),
 });
 
@@ -123,4 +164,11 @@ export const {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  /* -------------------------------------------------- */
+  /* -------------------------------------------------- */
+  /* -------------------------------------------------- */
+  /* -------------------------------------------------- */
+  /* -------------------------------------------------- */
+  useCreateProducedItemMutation,
+  useGetProducedItemsQuery,
 } = warehouseApi;

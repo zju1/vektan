@@ -143,7 +143,7 @@ export function ProductionOrderPage() {
       {
         title: t("actions"),
         key: "actions",
-        width: 120,
+        width: 105,
         align: "center",
         fixed: "right",
         render: (_, record) => (

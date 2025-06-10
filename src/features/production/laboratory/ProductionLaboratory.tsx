@@ -1,23 +1,59 @@
-import { useGetLaboratoryJournalQuery } from "@/app/store/services/sales.api";
+import {
+  useGetLaboratoryJournalQuery,
+  useUpdateLaboratoryJournalMutation,
+} from "@/app/store/services/sales.api";
 import { TablePage } from "@/components/table-page";
 import { useForm } from "@/hooks/useForm";
 import { useRules } from "@/hooks/useRules";
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, InputNumber, Modal } from "antd";
-import { useState } from "react";
+import { Button, InputNumber, message, Modal } from "antd";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { IProductionQA } from "./production-lab.dto";
 
 export function ProductionLaboratoryPage() {
   const { t } = useTranslation();
   const { data } = useGetLaboratoryJournalQuery();
-  const [currentChange, setCurrentChange] = useState<string | null>(null);
+  const [update] = useUpdateLaboratoryJournalMutation();
+  const [currentChange, setCurrentChange] = useState<
+    keyof IProductionQA | null
+  >(null);
   const { Form, form } = useForm();
   const { required } = useRules();
+  const [currentId, setCurrentId] = useState<string | null>(null);
+
+  const onFinish = useCallback(
+    async (values: IProductionQA) => {
+      const item = values[currentChange!] as number[];
+      const key: keyof IProductionQA =
+        currentChange === "viscosities"
+          ? "averageViscosity"
+          : currentChange === "droppingPoints"
+          ? "averageDroppingPoint"
+          : currentChange === "softeningTemps"
+          ? "aveareageSofteningTemp"
+          : "averageMeltingPoint";
+      const body = {
+        ...values,
+        _id: currentId!,
+        [key]: item.reduce((prev, curr) => (prev += curr), 0) / item.length,
+      };
+      await update(body).unwrap();
+      message.success({
+        content: t("laboratoryChecksUpdatedSuccessfully"),
+      });
+      setCurrentChange(null);
+      setCurrentId(null);
+    },
+    [currentChange, currentId, t, update]
+  );
+
   return (
     <div>
       <TablePage
         table={{
           dataSource: data,
+          scroll: { x: 1200 },
           columns: [
             {
               title: "№",
@@ -72,8 +108,9 @@ export function ProductionLaboratoryPage() {
                     "viscosities",
                     record.viscosities.length > 0
                       ? record.viscosities
-                      : new Array(10).fill(0)
+                      : new Array(10).fill(undefined)
                   );
+                  setCurrentId(record._id);
                   setCurrentChange("viscosities");
                 },
                 className: "cursor-pointer",
@@ -91,8 +128,9 @@ export function ProductionLaboratoryPage() {
                     "softeningTemps",
                     record.softeningTemps.length > 0
                       ? record.softeningTemps
-                      : new Array(10).fill(0)
+                      : new Array(10).fill(undefined)
                   );
+                  setCurrentId(record._id);
                   setCurrentChange("softeningTemps");
                 },
                 className: "cursor-pointer",
@@ -110,8 +148,9 @@ export function ProductionLaboratoryPage() {
                     "droppingPoints",
                     record.droppingPoints.length > 0
                       ? record.droppingPoints
-                      : new Array(10).fill(0)
+                      : new Array(10).fill(undefined)
                   );
+                  setCurrentId(record._id);
                   setCurrentChange("droppingPoints");
                 },
                 className: "cursor-pointer",
@@ -129,8 +168,9 @@ export function ProductionLaboratoryPage() {
                     "meltingPoints",
                     record.meltingPoints.length > 0
                       ? record.meltingPoints
-                      : new Array(10).fill(0)
+                      : new Array(10).fill(undefined)
                   );
+                  setCurrentId(record._id);
                   setCurrentChange("meltingPoints");
                 },
                 className: "cursor-pointer",
@@ -142,12 +182,7 @@ export function ProductionLaboratoryPage() {
               key: "certificateOfAnalyzys",
               width: 100,
               align: "center",
-              render: (_value, record) =>
-                record.certificateOfAnalyzys.length === 0 ? (
-                  <Button> {t("upload")} </Button>
-                ) : (
-                  <Button> {t("view")} </Button>
-                ),
+              render: (_value) => <Button> {t("download")} </Button>,
             },
           ],
         }}
@@ -156,13 +191,17 @@ export function ProductionLaboratoryPage() {
       <Modal
         title={t(currentChange!, { name: "" })}
         open={!!currentChange}
-        onCancel={() => setCurrentChange(null)}
+        onCancel={() => {
+          setCurrentChange(null);
+          setCurrentId(null);
+        }}
         okText={t("save")}
         cancelText={t("cancel")}
         onOk={() => form.submit()}
+        destroyOnClose
       >
         {currentChange && (
-          <Form layout="vertical" form={form}>
+          <Form layout="vertical" form={form} onFinish={onFinish}>
             <Form.List name={currentChange}>
               {(fields, { add, remove }) => (
                 <div className="grid gap-6">

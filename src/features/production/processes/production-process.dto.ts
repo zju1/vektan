@@ -20,3 +20,12 @@ export interface SingleProductionJournal {
   actualProductionDate: string;
   diff: number;
 }
+
+export interface MarkAsPackedDTO {
+  productionId: string;
+  bruttoWeight: { weight: number; unitType: string };
+  nettoWeight: { weight: number; unitType: string };
+  numberOfBags: number;
+  numberOfPallets: number;
+  placementInWarehouse: string;
+}

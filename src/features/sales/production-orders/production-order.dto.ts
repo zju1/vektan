@@ -9,6 +9,8 @@ export type ProductionOrderStatus =
   | "planned"
   | "producing"
   | "produced"
+  | "packed"
+  | "loaded"
   | "shipping"
   | "delivered";
 
@@ -62,6 +64,7 @@ export const productionOrderStatuses = [
   { label: "planned", value: "planned" },
   { label: "producing", value: "producing" },
   { label: "produced", value: "produced" },
+  { label: "packed", value: "packed" },
   { label: "shipping", value: "shipping" },
   { label: "delivered", value: "delivered" },
   { label: "partial_paid", value: "partial_paid" },

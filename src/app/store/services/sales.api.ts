@@ -20,8 +20,22 @@ import type {
   RecipeModelDTO,
   SingleRecipe,
 } from "@/features/production/recipes/recipe.dto";
-import { SingleProductionJournal } from "@/features/production/processes/production-process.dto";
-import type { SingleProductionQA } from "@/features/production/laboratory/production-lab.dto";
+import {
+  SingleProductionJournal,
+  type IProductionJournal,
+} from "@/features/production/processes/production-process.dto";
+import type {
+  IProductionQA,
+  SingleProductionQA,
+} from "@/features/production/laboratory/production-lab.dto";
+import type {
+  ShipmentDTO,
+  SingleShipment,
+} from "@/features/sales/shipments/shipment.dto";
+import type {
+  IShipmentReport,
+  ShipmentReportDTO,
+} from "@/features/sales/shipment-reports/shipment-report.dto";
 
 export const salesApi = createApi({
   reducerPath: "salesApi",
@@ -53,6 +67,8 @@ export const salesApi = createApi({
     "Recipes",
     "ProductionJournal",
     "ProductionLab",
+    "Shipments",
+    "ShipmentReport",
   ],
   endpoints: (builder) => ({
     getRecipeModels: builder.query<SingleRecipe[], void>({
@@ -603,10 +619,59 @@ export const salesApi = createApi({
       query: () => `prod-journal`,
       providesTags: ["ProductionJournal"],
     }),
+    updateProductJournal: builder.mutation<
+      SingleProductionJournal,
+      Partial<IProductionJournal>
+    >({
+      query: (body) => ({
+        url: `prod-journal/${body._id}`,
+        body,
+        method: "PUT",
+      }),
+      invalidatesTags: ["ProductionJournal"],
+    }),
     //#endregion
     getLaboratoryJournal: builder.query<SingleProductionQA[], void>({
       query: () => `prod-qa`,
       providesTags: ["ProductionLab"],
+    }),
+    updateLaboratoryJournal: builder.mutation<
+      SingleProductionQA,
+      Partial<IProductionQA>
+    >({
+      query: (body) => ({
+        url: `prod-qa/${body._id}`,
+        body,
+        method: "PUT",
+      }),
+      invalidatesTags: ["ProductionLab"],
+    }),
+    getShipments: builder.query<SingleShipment[], void>({
+      query: () => `shipments`,
+      providesTags: ["Shipments"],
+    }),
+    createShipment: builder.mutation<SingleShipment, ShipmentDTO>({
+      query: (body) => ({
+        url: `shipments`,
+        body,
+        method: "POST",
+      }),
+      invalidatesTags: ["Shipments"],
+    }),
+    getShipmentReports: builder.query<IShipmentReport[], RequestParamsType>({
+      query: (params) => ({
+        url: `shipment-report`,
+        params,
+      }),
+      providesTags: ["ShipmentReport"],
+    }),
+    createShipmentReport: builder.mutation<IShipmentReport, ShipmentReportDTO>({
+      query: (body) => ({
+        url: `shipment-report`,
+        body,
+        method: "POST",
+      }),
+      invalidatesTags: ["ShipmentReport", "Shipments"],
     }),
   }),
 });
@@ -731,4 +796,10 @@ export const {
   useDeleteRecipeModelMutation,
   useGetProductionJournalQuery,
   useGetLaboratoryJournalQuery,
+  useUpdateProductJournalMutation,
+  useUpdateLaboratoryJournalMutation,
+  useGetShipmentsQuery,
+  useCreateShipmentMutation,
+  useCreateShipmentReportMutation,
+  useGetShipmentReportsQuery,
 } = salesApi;

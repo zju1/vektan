@@ -55,10 +55,6 @@ export const navigationData = {
           url: "/sales/logistics-reports",
         },
         {
-          title: "logisticsTracking",
-          url: "/sales/logistics-tracking",
-        },
-        {
           title: "mutualSettlementVectanIlca",
           url: "/sales/msvil",
         },
@@ -74,9 +70,22 @@ export const navigationData = {
           title: "clientOrders",
           url: "/sales/client-orders",
         }, */
+
         {
           title: "productionOrders",
           url: "/sales/production-orders",
+        },
+        {
+          title: "shipments",
+          url: "/sales/shipments",
+        },
+        {
+          title: "shipmentReports",
+          url: "/sales/shipment-reports",
+        },
+        {
+          title: "logisticsTracking",
+          url: "/sales/logistics-tracking",
         },
       ],
     },
@@ -106,6 +115,10 @@ export const navigationData = {
       title: "warehouse",
       icon: Package,
       items: [
+        {
+          title: "Готовая продукция",
+          url: "/warehouse/ready-products",
+        },
         {
           title: "Анализ остатков",
           url: "/warehouse/analyze",
